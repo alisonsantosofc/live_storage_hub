@@ -1,66 +1,50 @@
 package com.alisondev.live_storage_hub.controller;
 
-import com.alisondev.live_storage_hub.entity.*;
-import com.alisondev.live_storage_hub.repository.*;
+import com.alisondev.live_storage_hub.dto.*;
+import com.alisondev.live_storage_hub.entity.UserData;
 import com.alisondev.live_storage_hub.security.JwtUtil;
+import com.alisondev.live_storage_hub.service.UserDataService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user_data")
 public class UserDataController {
-  private final AppRepository appRepository;
-  private final UserRepository userRepository;
-  private final UserDataRepository userDataRepository;
+  private final UserDataService userDataService;
   private final JwtUtil jwtUtil;
 
-  public UserDataController(AppRepository appRepository, UserRepository userRepository,
-      UserDataRepository userDataRepository, JwtUtil jwtUtil) {
-    this.appRepository = appRepository;
-    this.userRepository = userRepository;
-    this.userDataRepository = userDataRepository;
+  public UserDataController(UserDataService userDataService, JwtUtil jwtUtil) {
+    this.userDataService = userDataService;
     this.jwtUtil = jwtUtil;
   }
 
   @PostMapping
-  public UserData saveUserData(@RequestHeader("Authorization") String authHeader,
-      @RequestBody Map<String, Object> payload) {
+  public ApiResponse<UserDataResponse> saveData(@RequestHeader("Authorization") String authHeader,
+      @RequestParam("userId") Long userId,
+      @RequestBody UserDataRequest request) {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
-
-    App app = appRepository.findById(appId).orElseThrow();
-    Long userId = Long.valueOf(payload.get("userId").toString());
-
-    User user = userRepository.findById(userId).orElseThrow();
-
-    if (!user.getApp().getId().equals(appId)) {
-      throw new RuntimeException("User does not registered in current application.");
-    }
-
-    UserData userData = UserData.builder()
-        .app(app)
-        .user(user)
-        .jsonData((Map<String, Object>) payload.get("data"))
-        .build();
-
-    return userDataRepository.save(userData);
+    UserData data = userDataService.saveData(appId, userId, request);
+    return ApiResponse.ok(toDto(data));
   }
 
   @GetMapping
-  public List<UserData> listUserData(@RequestHeader("Authorization") String authHeader,
-      @RequestParam Long userId) {
+  public ApiResponse<List<UserDataResponse>> listData(@RequestHeader("Authorization") String authHeader,
+      @RequestParam("userId") Long userId) {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
+    List<UserDataResponse> list = userDataService.listData(appId, userId)
+        .stream().map(this::toDto).collect(Collectors.toList());
+    return ApiResponse.ok(list);
+  }
 
-    App app = appRepository.findById(appId).orElseThrow();
-    User user = userRepository.findById(userId).orElseThrow();
-
-    if (!user.getApp().getId().equals(appId)) {
-      throw new RuntimeException("User does not registered in current application.");
-    }
-
-    return userDataRepository.findByAppAndUser(app, user);
+  private UserDataResponse toDto(UserData data) {
+    UserDataResponse dto = new UserDataResponse();
+    dto.setId(data.getId());
+    dto.setJsonData(data.getJsonData());
+    dto.setCreatedAt(data.getCreatedAt());
+    return dto;
   }
 }

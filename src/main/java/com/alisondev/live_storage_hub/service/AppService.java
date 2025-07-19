@@ -2,36 +2,40 @@ package com.alisondev.live_storage_hub.service;
 
 import com.alisondev.live_storage_hub.entity.App;
 import com.alisondev.live_storage_hub.repository.AppRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AppService {
   private final AppRepository appRepository;
 
+  @Value("${admin.api-key}")
+  private String adminApiKey;
+
   public AppService(AppRepository appRepository) {
     this.appRepository = appRepository;
   }
 
-  public List<App> findAll() {
-    return appRepository.findAll();
-  }
+  public App registerApp(String adminKey, String appName) {
+    if (!adminApiKey.equals(adminKey)) {
+      throw new RuntimeException("Acesso negado: admin key inválida");
+    }
 
-  public Optional<App> findById(Long id) {
-    return appRepository.findById(id);
-  }
+    App app = App.builder()
+        .name(appName)
+        .apiKey(UUID.randomUUID().toString())
+        .build();
 
-  public Optional<App> findByApiKey(String apiKey) {
-    return appRepository.findByApiKey(apiKey);
-  }
-
-  public App save(App app) {
     return appRepository.save(app);
   }
 
-  public void deleteById(Long id) {
-    appRepository.deleteById(id);
+  public List<App> listApps(String adminKey) {
+    if (!adminApiKey.equals(adminKey)) {
+      throw new RuntimeException("Acesso negado: admin key inválida");
+    }
+    return appRepository.findAll();
   }
 }

@@ -1,66 +1,80 @@
 package com.alisondev.live_storage_hub.controller;
 
+import com.alisondev.live_storage_hub.config.StorageConfig;
+import com.alisondev.live_storage_hub.dto.*;
 import com.alisondev.live_storage_hub.entity.*;
 import com.alisondev.live_storage_hub.repository.*;
 import com.alisondev.live_storage_hub.security.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.nio.file.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user_file")
 public class UserFileController {
+
   private final AppRepository appRepository;
   private final UserRepository userRepository;
   private final UserFileRepository userFileRepository;
   private final JwtUtil jwtUtil;
+  private final StorageConfig storageConfig;
   private final S3Client s3Client;
-  private final String bucketName = "seu-bucket";
 
+  @Autowired
   public UserFileController(AppRepository appRepository, UserRepository userRepository,
-      UserFileRepository userFileRepository, JwtUtil jwtUtil) {
+      UserFileRepository userFileRepository, JwtUtil jwtUtil,
+      StorageConfig storageConfig, @Autowired(required = false) S3Client s3Client) {
     this.appRepository = appRepository;
     this.userRepository = userRepository;
     this.userFileRepository = userFileRepository;
     this.jwtUtil = jwtUtil;
-
-    this.s3Client = S3Client.builder()
-        .region(Region.US_EAST_1)
-        .credentialsProvider(ProfileCredentialsProvider.create())
-        .build();
+    this.storageConfig = storageConfig;
+    this.s3Client = s3Client;
   }
 
   @PostMapping("/upload")
-  public UserFile uploadFile(@RequestHeader("Authorization") String authHeader,
+  public ApiResponse<UserFileResponse> uploadFile(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId,
       @RequestParam("file") MultipartFile file,
       @RequestParam("fileType") String fileType) throws IOException {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
 
-    App app = appRepository.findById(appId).orElseThrow();
-    User user = userRepository.findById(userId).orElseThrow();
+    App app = appRepository.findById(appId).orElseThrow(() -> new RuntimeException("App não encontrado"));
+    User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-    if (!user.getApp().getId().equals(appId)) {
-      throw new RuntimeException("User does not registered in current application.");
-    }
+    if (!user.getApp().getId().equals(appId))
+      throw new RuntimeException("Usuário não pertence a este App");
 
-    String key = UUID.randomUUID() + "_" + file.getOriginalFilename();
+    String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+    String fileUrl;
 
-    // Upload para S3
-    s3Client.putObject(
-        PutObjectRequest.builder().bucket(bucketName).key(key).build(),
-        software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
-
-    String fileUrl = "https://" + bucketName + ".s3.amazonaws.com/" + key;
+    if ("local".equalsIgnoreCase(storageConfig.getStorageMode())) {
+      Path uploadPath = Paths.get(storageConfig.getLocalPath());
+      if (!Files.exists(uploadPath))
+        Files.createDirectories(uploadPath);
+      Path destination = uploadPath.resolve(fileName);
+      Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+      fileUrl = destination.toAbsolutePath().toString();
+    } else if ("s3".equalsIgnoreCase(storageConfig.getStorageMode())) {
+      if (s3Client == null)
+        throw new RuntimeException("S3 não está configurado");
+      s3Client.putObject(
+          PutObjectRequest.builder()
+              .bucket(storageConfig.getBucketName())
+              .key(fileName)
+              .build(),
+          software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
+      fileUrl = "https://" + storageConfig.getBucketName() + ".s3.amazonaws.com/" + fileName;
+    } else
+      throw new RuntimeException("Configuração de storage inválida");
 
     UserFile userFile = UserFile.builder()
         .app(app)
@@ -70,22 +84,37 @@ public class UserFileController {
         .metadata(Map.of("size", file.getSize(), "name", file.getOriginalFilename()))
         .build();
 
-    return userFileRepository.save(userFile);
+    userFileRepository.save(userFile);
+
+    return ApiResponse.ok(toDto(userFile));
   }
 
   @GetMapping("/list")
-  public List<UserFile> listFiles(@RequestHeader("Authorization") String authHeader,
+  public ApiResponse<List<UserFileResponse>> listFiles(@RequestHeader("Authorization") String authHeader,
       @RequestParam Long userId) {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
 
-    App app = appRepository.findById(appId).orElseThrow();
-    User user = userRepository.findById(userId).orElseThrow();
+    App app = appRepository.findById(appId).orElseThrow(() -> new RuntimeException("App não encontrado"));
+    User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-    if (!user.getApp().getId().equals(appId)) {
-      throw new RuntimeException("User does not registered in current application.");
-    }
+    if (!user.getApp().getId().equals(appId))
+      throw new RuntimeException("Usuário não pertence a este App");
 
-    return userFileRepository.findByAppAndUser(app, user);
+    List<UserFileResponse> responseList = userFileRepository.findByAppAndUser(app, user)
+        .stream().map(this::toDto)
+        .collect(Collectors.toList());
+
+    return ApiResponse.ok(responseList);
+  }
+
+  private UserFileResponse toDto(UserFile entity) {
+    UserFileResponse dto = new UserFileResponse();
+    dto.setId(entity.getId());
+    dto.setFileType(entity.getFileType());
+    dto.setFileUrl(entity.getFileUrl());
+    dto.setMetadata(entity.getMetadata());
+    dto.setCreatedAt(entity.getCreatedAt());
+    return dto;
   }
 }

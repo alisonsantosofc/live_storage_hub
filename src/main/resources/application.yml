@@ -2,6 +2,9 @@ server:
   port: 9090
 
 spring:
+  profiles:
+    active: local
+    
   datasource:
     url: jdbc:postgresql://localhost:5432/live_storage_hub
     username: postgres
@@ -22,19 +25,9 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-# JWT config
 jwt:
   secret: ${JWT_SECRET_KEY}
   expiration: 86400000 # 1 day in ms
-
-# AWS S3
-aws:
-  s3:
-    bucket: live-storage-hub
-    region: us-east-1
-  credentials:
-    access-key: ${AWS_ACCESS_KEY_ID}
-    secret-key: ${AWS_SECRET_ACCESS_KEY}
 
 admin:
   api-key: ${ADMIN_SUPER_SECRET_KEY}

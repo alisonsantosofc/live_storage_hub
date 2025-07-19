@@ -1,49 +1,46 @@
 package com.alisondev.live_storage_hub.controller;
 
+import com.alisondev.live_storage_hub.dto.ApiResponse;
+import com.alisondev.live_storage_hub.dto.AppResponse;
 import com.alisondev.live_storage_hub.entity.App;
-import com.alisondev.live_storage_hub.repository.AppRepository;
-import org.springframework.beans.factory.annotation.Value;
+import com.alisondev.live_storage_hub.service.AppService;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/apps")
 public class AppController {
-  private final AppRepository appRepository;
 
-  @Value("${admin.api-key}")
-  private String adminApiKey;
+  private final AppService appService;
 
-  public AppController(AppRepository appRepository) {
-    this.appRepository = appRepository;
+  public AppController(AppService appService) {
+    this.appService = appService;
   }
 
-  @PostMapping
-  public App createApp(@RequestHeader("X-ADMIN-KEY") String key,
-      @RequestBody App app) {
-    validateAdminKey(key);
-    app.setApiKey(generateApiKey());
-    return appRepository.save(app);
+  @PostMapping("/register")
+  public ApiResponse<AppResponse> registerApp(@RequestHeader("X-Admin-Key") String adminKey,
+      @RequestBody Map<String, String> body) {
+    App app = appService.registerApp(adminKey, body.get("name"));
+    return ApiResponse.ok(toDto(app));
   }
 
   @GetMapping
-  public List<App> listApps(@RequestHeader("X-ADMIN-KEY") String key) {
-    validateAdminKey(key);
-    return appRepository.findAll();
+  public ApiResponse<List<AppResponse>> listApps(@RequestHeader("X-Admin-Key") String adminKey) {
+    List<AppResponse> apps = appService.listApps(adminKey).stream()
+        .map(this::toDto)
+        .collect(Collectors.toList());
+    return ApiResponse.ok(apps);
   }
 
-  private void validateAdminKey(String key) {
-    if (!adminApiKey.equals(key)) {
-      throw new RuntimeException("Acesso negado: chave inválida");
-    }
-  }
-
-  private String generateApiKey() {
-    byte[] randomBytes = new byte[32];
-    new SecureRandom().nextBytes(randomBytes);
-    return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+  private AppResponse toDto(App app) {
+    AppResponse dto = new AppResponse();
+    dto.setId(app.getId());
+    dto.setName(app.getName());
+    dto.setApiKey(app.getApiKey());
+    dto.setCreatedAt(app.getCreatedAt());
+    return dto;
   }
 }
