@@ -17,7 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AppController.class)
 class AppControllerTest {
-
   @Autowired
   private MockMvc mockMvc;
 
@@ -26,7 +25,13 @@ class AppControllerTest {
 
   @Test
   void listApps_shouldReturnOk() throws Exception {
-    App app = new App(1L, "TestApp", "12345", LocalDateTime.now());
+    App app = App.builder()
+        .id(1L)
+        .name("TestApp")
+        .apiKey("apikey123")
+        .createdAt(LocalDateTime.now())
+        .build();
+    
     Mockito.when(appService.listApps("admin-key")).thenReturn(List.of(app));
 
     mockMvc.perform(get("/apps")
