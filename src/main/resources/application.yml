@@ -1,0 +1,32 @@
+server:
+  port: 9090
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/live_storage_hub
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+
+# JWT config
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  expiration: 86400000 # 1 day in ms
+
+# AWS S3
+aws:
+  s3:
+    bucket: live-storage-hub
+    region: us-east-1
+  credentials:
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
