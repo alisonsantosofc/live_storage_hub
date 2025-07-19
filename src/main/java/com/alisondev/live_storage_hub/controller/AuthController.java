@@ -3,10 +3,15 @@ package com.alisondev.live_storage_hub.controller;
 import com.alisondev.live_storage_hub.dto.*;
 import com.alisondev.live_storage_hub.entity.User;
 import com.alisondev.live_storage_hub.service.AuthService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Authentication", description = "Endpoints para autenticação.")
 public class AuthController {
   private final AuthService authService;
 
@@ -14,6 +19,7 @@ public class AuthController {
     this.authService = authService;
   }
 
+  @Operation(summary = "Registro de usuário", description = "Realiza registro de usuário e retorna dados do usuário.")
   @PostMapping("/register")
   public ApiResponse<UserResponse> register(@RequestHeader("X-Api-Key") String apiKey,
       @RequestBody UserRegisterRequest request) {
@@ -21,6 +27,7 @@ public class AuthController {
     return ApiResponse.ok(toDto(user));
   }
 
+  @Operation(summary = "Login do usuário", description = "Realiza autenticação e retorna JWT.")
   @PostMapping("/login")
   public ApiResponse<AuthResponse> login(@RequestHeader("X-Api-Key") String apiKey,
       @RequestBody LoginRequest request) {

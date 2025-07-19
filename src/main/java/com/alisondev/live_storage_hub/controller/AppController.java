@@ -4,6 +4,10 @@ import com.alisondev.live_storage_hub.dto.ApiResponse;
 import com.alisondev.live_storage_hub.dto.AppResponse;
 import com.alisondev.live_storage_hub.entity.App;
 import com.alisondev.live_storage_hub.service.AppService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,6 +16,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/apps")
+@Tag(name = "Apps", description = "Endpoints para aplicativos.")
 public class AppController {
 
   private final AppService appService;
@@ -20,6 +25,7 @@ public class AppController {
     this.appService = appService;
   }
 
+  @Operation(summary = "Registro de apps", description = "Realiza registro de app e retorna dados do app.")
   @PostMapping("/register")
   public ApiResponse<AppResponse> registerApp(@RequestHeader("X-Admin-Key") String adminKey,
       @RequestBody Map<String, String> body) {
@@ -27,6 +33,7 @@ public class AppController {
     return ApiResponse.ok(toDto(app));
   }
 
+  @Operation(summary = "Listagem de apps", description = "Lista todos os apps registrados.")
   @GetMapping
   public ApiResponse<List<AppResponse>> listApps(@RequestHeader("X-Admin-Key") String adminKey) {
     List<AppResponse> apps = appService.listApps(adminKey).stream()

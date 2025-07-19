@@ -5,6 +5,10 @@ import com.alisondev.live_storage_hub.dto.*;
 import com.alisondev.live_storage_hub.entity.*;
 import com.alisondev.live_storage_hub.repository.*;
 import com.alisondev.live_storage_hub.security.JwtUtil;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +22,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user_file")
+@Tag(name = "User File", description = "Endpoints para arquivos de usuários.")
 public class UserFileController {
 
   private final AppRepository appRepository;
@@ -39,6 +44,7 @@ public class UserFileController {
     this.s3Client = s3Client;
   }
 
+  @Operation(summary = "Upload de arquivos do usuário", description = "Realiza upload de arquivos do usuário.")
   @PostMapping("/upload")
   public ApiResponse<UserFileResponse> uploadFile(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId,
@@ -94,6 +100,7 @@ public class UserFileController {
     return ApiResponse.ok(toDto(userFile));
   }
 
+  @Operation(summary = "Listagem de arquivos do usuário", description = "Lista todos os arquivos do usuário.")
   @GetMapping("/list")
   public ApiResponse<List<UserFileResponse>> listFiles(@RequestHeader("Authorization") String authHeader,
       @RequestParam Long userId) {
