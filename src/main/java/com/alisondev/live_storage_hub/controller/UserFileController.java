@@ -58,20 +58,25 @@ public class UserFileController {
 
     if ("local".equalsIgnoreCase(storageConfig.getStorageMode())) {
       Path uploadPath = Paths.get(storageConfig.getLocalPath());
+
       if (!Files.exists(uploadPath))
         Files.createDirectories(uploadPath);
+
       Path destination = uploadPath.resolve(fileName);
+
       Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
       fileUrl = destination.toAbsolutePath().toString();
     } else if ("s3".equalsIgnoreCase(storageConfig.getStorageMode())) {
       if (s3Client == null)
         throw new RuntimeException("S3 não está configurado");
+
       s3Client.putObject(
           PutObjectRequest.builder()
               .bucket(storageConfig.getBucketName())
               .key(fileName)
               .build(),
           software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
+
       fileUrl = "https://" + storageConfig.getBucketName() + ".s3.amazonaws.com/" + fileName;
     } else
       throw new RuntimeException("Configuração de storage inválida");

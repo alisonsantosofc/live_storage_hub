@@ -8,11 +8,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
   @Bean
-  public OpenAPI apiInfo() {
+  public OpenAPI customOpenAPI() {
     return new OpenAPI()
         .info(new Info()
             .title("Live Storage Hub API")
             .description("Centralized API for multiples apps.")
-            .version("1.0.0"));
+            .version("1.0"));
   }
 }
