@@ -6,7 +6,9 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+    @UniqueConstraint(columnNames = { "app_id", "email" })
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,6 +20,10 @@ public class User {
 
   @Column(nullable = false)
   private String name;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "app_id", nullable = false)
+  private App app;
 
   @Column(nullable = false, unique = true)
   private String email;
