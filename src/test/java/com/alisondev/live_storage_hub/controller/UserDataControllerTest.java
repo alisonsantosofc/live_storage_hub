@@ -1,11 +1,12 @@
 package com.alisondev.live_storage_hub.controller;
 
-import com.alisondev.live_storage_hub.dto.user_data.UserDataRequest;
-import com.alisondev.live_storage_hub.entity.App;
-import com.alisondev.live_storage_hub.entity.User;
-import com.alisondev.live_storage_hub.entity.UserData;
+import com.alisondev.live_storage_hub.dtos.user_data.UserDataRequest;
+import com.alisondev.live_storage_hub.modules.apps.entities.App;
+import com.alisondev.live_storage_hub.modules.users.controllers.UserDataController;
+import com.alisondev.live_storage_hub.modules.users.entities.User;
+import com.alisondev.live_storage_hub.modules.users.entities.UserData;
+import com.alisondev.live_storage_hub.modules.users.services.UserDataService;
 import com.alisondev.live_storage_hub.security.JwtUtil;
-import com.alisondev.live_storage_hub.service.UserDataService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

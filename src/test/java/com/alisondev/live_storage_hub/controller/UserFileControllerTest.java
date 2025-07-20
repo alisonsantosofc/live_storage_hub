@@ -1,12 +1,13 @@
 package com.alisondev.live_storage_hub.controller;
 
 import com.alisondev.live_storage_hub.config.StorageConfig;
-import com.alisondev.live_storage_hub.entity.App;
-import com.alisondev.live_storage_hub.entity.User;
-import com.alisondev.live_storage_hub.entity.UserFile;
-import com.alisondev.live_storage_hub.repository.AppRepository;
-import com.alisondev.live_storage_hub.repository.UserFileRepository;
-import com.alisondev.live_storage_hub.repository.UserRepository;
+import com.alisondev.live_storage_hub.modules.apps.entities.App;
+import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
+import com.alisondev.live_storage_hub.modules.users.controllers.UserFileController;
+import com.alisondev.live_storage_hub.modules.users.entities.User;
+import com.alisondev.live_storage_hub.modules.users.entities.UserFile;
+import com.alisondev.live_storage_hub.modules.users.repositories.UserFileRepository;
+import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
 import com.alisondev.live_storage_hub.security.JwtUtil;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

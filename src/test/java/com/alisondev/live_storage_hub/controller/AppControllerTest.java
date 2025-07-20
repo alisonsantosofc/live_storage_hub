@@ -1,7 +1,9 @@
 package com.alisondev.live_storage_hub.controller;
 
-import com.alisondev.live_storage_hub.entity.App;
-import com.alisondev.live_storage_hub.service.AppService;
+import com.alisondev.live_storage_hub.modules.apps.controllers.AppController;
+import com.alisondev.live_storage_hub.modules.apps.entities.App;
+import com.alisondev.live_storage_hub.modules.apps.services.AppService;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;

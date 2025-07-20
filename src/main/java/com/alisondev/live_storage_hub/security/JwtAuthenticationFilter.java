@@ -1,9 +1,10 @@
 package com.alisondev.live_storage_hub.security;
 
-import com.alisondev.live_storage_hub.entity.App;
-import com.alisondev.live_storage_hub.entity.User;
-import com.alisondev.live_storage_hub.repository.AppRepository;
-import com.alisondev.live_storage_hub.repository.UserRepository;
+import com.alisondev.live_storage_hub.modules.apps.entities.App;
+import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
+import com.alisondev.live_storage_hub.modules.users.entities.User;
+import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
