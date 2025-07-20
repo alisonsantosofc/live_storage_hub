@@ -1,4 +1,4 @@
-package com.alisondev.live_storage_hub.dto;
+package com.alisondev.live_storage_hub.dto.user_data;
 
 import java.time.LocalDateTime;
 import java.util.Map;

@@ -1,6 +1,6 @@
 package com.alisondev.live_storage_hub.controller;
 
-import com.alisondev.live_storage_hub.dto.UserDataRequest;
+import com.alisondev.live_storage_hub.dto.user_data.UserDataRequest;
 import com.alisondev.live_storage_hub.entity.App;
 import com.alisondev.live_storage_hub.entity.User;
 import com.alisondev.live_storage_hub.entity.UserData;

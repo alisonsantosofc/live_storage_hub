@@ -1,6 +1,6 @@
 package com.alisondev.live_storage_hub.exception;
 
-import com.alisondev.live_storage_hub.dto.ApiResponse;
+import com.alisondev.live_storage_hub.dto.CustomApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 public class GlobalExceptionHandler {
   @ExceptionHandler(RuntimeException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ApiResponse<String> handleRuntimeException(RuntimeException ex) {
-    return ApiResponse.error(ex.getMessage());
+  public CustomApiResponse<String> handleRuntimeException(RuntimeException ex) {
+    return CustomApiResponse.error(ex.getMessage());
   }
 }

@@ -1,6 +1,8 @@
 package com.alisondev.live_storage_hub.service;
 
 import com.alisondev.live_storage_hub.dto.*;
+import com.alisondev.live_storage_hub.dto.user.UserRegisterRequest;
+import com.alisondev.live_storage_hub.dto.user.UserResponse;
 import com.alisondev.live_storage_hub.entity.App;
 import com.alisondev.live_storage_hub.entity.User;
 import com.alisondev.live_storage_hub.repository.AppRepository;

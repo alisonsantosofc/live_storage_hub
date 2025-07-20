@@ -1,6 +1,8 @@
 package com.alisondev.live_storage_hub.controller;
 
 import com.alisondev.live_storage_hub.dto.*;
+import com.alisondev.live_storage_hub.dto.user_data.UserDataRequest;
+import com.alisondev.live_storage_hub.dto.user_data.UserDataResponse;
 import com.alisondev.live_storage_hub.entity.UserData;
 import com.alisondev.live_storage_hub.security.JwtUtil;
 import com.alisondev.live_storage_hub.service.UserDataService;
@@ -27,24 +29,24 @@ public class UserDataController {
 
   @Operation(summary = "Registro de dados do usuário", description = "Realiza registro de dados do usuário.")
   @PostMapping
-  public ApiResponse<UserDataResponse> saveData(@RequestHeader("Authorization") String authHeader,
+  public CustomApiResponse<UserDataResponse> saveData(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId,
       @RequestBody UserDataRequest request) {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
     UserData data = userDataService.saveData(appId, userId, request);
-    return ApiResponse.ok(toDto(data));
+    return CustomApiResponse.ok(toDto(data));
   }
 
   @Operation(summary = "Listagem de dados do usuário", description = "Lista todos os dados do usuário.")
   @GetMapping
-  public ApiResponse<List<UserDataResponse>> listData(@RequestHeader("Authorization") String authHeader,
+  public CustomApiResponse<List<UserDataResponse>> listData(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId) {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
     List<UserDataResponse> list = userDataService.listData(appId, userId)
         .stream().map(this::toDto).collect(Collectors.toList());
-    return ApiResponse.ok(list);
+    return CustomApiResponse.ok(list);
   }
 
   private UserDataResponse toDto(UserData data) {

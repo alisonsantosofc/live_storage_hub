@@ -2,6 +2,7 @@ package com.alisondev.live_storage_hub.controller;
 
 import com.alisondev.live_storage_hub.config.StorageConfig;
 import com.alisondev.live_storage_hub.dto.*;
+import com.alisondev.live_storage_hub.dto.user_file.UserFileResponse;
 import com.alisondev.live_storage_hub.entity.*;
 import com.alisondev.live_storage_hub.repository.*;
 import com.alisondev.live_storage_hub.security.JwtUtil;
@@ -46,7 +47,7 @@ public class UserFileController {
 
   @Operation(summary = "Upload de arquivos do usuário", description = "Realiza upload de arquivos do usuário.")
   @PostMapping("/upload")
-  public ApiResponse<UserFileResponse> uploadFile(@RequestHeader("Authorization") String authHeader,
+  public CustomApiResponse<UserFileResponse> uploadFile(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId,
       @RequestParam("file") MultipartFile file,
       @RequestParam("fileType") String fileType) throws IOException {
@@ -97,12 +98,12 @@ public class UserFileController {
 
     userFileRepository.save(userFile);
 
-    return ApiResponse.ok(toDto(userFile));
+    return CustomApiResponse.ok(toDto(userFile));
   }
 
   @Operation(summary = "Listagem de arquivos do usuário", description = "Lista todos os arquivos do usuário.")
   @GetMapping("/list")
-  public ApiResponse<List<UserFileResponse>> listFiles(@RequestHeader("Authorization") String authHeader,
+  public CustomApiResponse<List<UserFileResponse>> listFiles(@RequestHeader("Authorization") String authHeader,
       @RequestParam Long userId) {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
@@ -117,7 +118,7 @@ public class UserFileController {
         .stream().map(this::toDto)
         .collect(Collectors.toList());
 
-    return ApiResponse.ok(responseList);
+    return CustomApiResponse.ok(responseList);
   }
 
   private UserFileResponse toDto(UserFile entity) {

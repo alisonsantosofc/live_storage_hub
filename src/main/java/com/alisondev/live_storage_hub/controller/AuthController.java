@@ -1,6 +1,8 @@
 package com.alisondev.live_storage_hub.controller;
 
 import com.alisondev.live_storage_hub.dto.*;
+import com.alisondev.live_storage_hub.dto.user.UserRegisterRequest;
+import com.alisondev.live_storage_hub.dto.user.UserResponse;
 import com.alisondev.live_storage_hub.entity.User;
 import com.alisondev.live_storage_hub.service.AuthService;
 
@@ -21,17 +23,17 @@ public class AuthController {
 
   @Operation(summary = "Registro de usuário", description = "Realiza registro de usuário e retorna dados do usuário.")
   @PostMapping("/register")
-  public ApiResponse<UserResponse> register(@RequestHeader("X-Api-Key") String apiKey,
+  public CustomApiResponse<UserResponse> register(@RequestHeader("X-Api-Key") String apiKey,
       @RequestBody UserRegisterRequest request) {
     User user = authService.register(apiKey, request);
-    return ApiResponse.ok(toDto(user));
+    return CustomApiResponse.ok(toDto(user));
   }
 
   @Operation(summary = "Login do usuário", description = "Realiza autenticação e retorna JWT.")
   @PostMapping("/login")
-  public ApiResponse<AuthResponse> login(@RequestHeader("X-Api-Key") String apiKey,
+  public CustomApiResponse<AuthResponse> login(@RequestHeader("X-Api-Key") String apiKey,
       @RequestBody LoginRequest request) {
-    return ApiResponse.ok(authService.login(apiKey, request));
+    return CustomApiResponse.ok(authService.login(apiKey, request));
   }
 
   private UserResponse toDto(User user) {
