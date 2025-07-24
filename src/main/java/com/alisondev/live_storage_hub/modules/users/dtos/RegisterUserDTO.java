@@ -1,9 +1,9 @@
-package com.alisondev.live_storage_hub.modules.users.dtos.user;
+package com.alisondev.live_storage_hub.modules.users.dtos;
 
 import lombok.Data;
 
 @Data
-public class UserRegisterRequest {
+public class RegisterUserDTO {
   private String name;
   private String email;
   private String password;

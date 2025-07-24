@@ -1,11 +1,11 @@
-package com.alisondev.live_storage_hub.dtos.user;
+package com.alisondev.live_storage_hub.modules.users.dtos;
 
 import java.time.LocalDateTime;
 
 import lombok.Data;
 
 @Data
-public class UserResponse {
+public class UserResponseDTO {
   private Long id;
   private String name;
   private String email;

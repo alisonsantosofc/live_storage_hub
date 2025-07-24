@@ -2,7 +2,7 @@ package com.alisondev.live_storage_hub.modules.apps.dtos;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public class AppRegisterRequest {
+public class RegisterAppDTO {
   @Schema(description = "App name for register.", example = "MeuApp")
   private String name;
 

@@ -1,7 +1,7 @@
 package com.alisondev.live_storage_hub.modules.apps.controllers;
 
 import com.alisondev.live_storage_hub.dtos.CustomApiResponse;
-import com.alisondev.live_storage_hub.modules.apps.dtos.AppResponse;
+import com.alisondev.live_storage_hub.modules.apps.dtos.AppResponseDTO;
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
 import com.alisondev.live_storage_hub.modules.apps.services.ListAppsService;
 
@@ -25,16 +25,16 @@ public class ListAppsController {
 
   @GetMapping
   @Operation(summary = "List Apps", description = "List all registered apps.")
-  public CustomApiResponse<List<AppResponse>> listApps(
+  public CustomApiResponse<List<AppResponseDTO>> listApps(
       @RequestHeader("X-Admin-Key") String adminKey) {
-    List<AppResponse> apps = listAppsService.execute(adminKey).stream()
+    List<AppResponseDTO> apps = listAppsService.execute(adminKey).stream()
         .map(this::toDto)
         .collect(Collectors.toList());
     return CustomApiResponse.ok(apps);
   }
 
-  private AppResponse toDto(App app) {
-    AppResponse dto = new AppResponse();
+  private AppResponseDTO toDto(App app) {
+    AppResponseDTO dto = new AppResponseDTO();
     dto.setId(app.getId());
     dto.setName(app.getName());
     dto.setApiKey(app.getApiKey());

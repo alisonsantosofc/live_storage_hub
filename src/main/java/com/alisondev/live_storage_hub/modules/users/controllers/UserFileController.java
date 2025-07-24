@@ -1,14 +1,14 @@
 package com.alisondev.live_storage_hub.modules.users.controllers;
 
-import com.alisondev.live_storage_hub.config.StorageConfig;
-import com.alisondev.live_storage_hub.dtos.CustomApiResponse;
-import com.alisondev.live_storage_hub.dtos.user_file.UserFileResponse;
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
-import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
 import com.alisondev.live_storage_hub.modules.users.entities.User;
 import com.alisondev.live_storage_hub.modules.users.entities.UserFile;
-import com.alisondev.live_storage_hub.modules.users.repositories.UserFileRepository;
+import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
 import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
+import com.alisondev.live_storage_hub.modules.users.repositories.UserFileRepository;
+import com.alisondev.live_storage_hub.modules.users.dtos.UserFileResponseDTO;
+import com.alisondev.live_storage_hub.dtos.CustomApiResponse;
+import com.alisondev.live_storage_hub.config.StorageConfig;
 import com.alisondev.live_storage_hub.security.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
@@ -50,7 +51,7 @@ public class UserFileController {
 
   @Operation(summary = "Upload de arquivos do usuário", description = "Realiza upload de arquivos do usuário.")
   @PostMapping("/upload")
-  public CustomApiResponse<UserFileResponse> uploadFile(@RequestHeader("Authorization") String authHeader,
+  public CustomApiResponse<UserFileResponseDTO> uploadFile(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId,
       @RequestParam("file") MultipartFile file,
       @RequestParam("fileType") String fileType) throws IOException {
@@ -106,7 +107,7 @@ public class UserFileController {
 
   @Operation(summary = "Listagem de arquivos do usuário", description = "Lista todos os arquivos do usuário.")
   @GetMapping("/list")
-  public CustomApiResponse<List<UserFileResponse>> listFiles(@RequestHeader("Authorization") String authHeader,
+  public CustomApiResponse<List<UserFileResponseDTO>> listFiles(@RequestHeader("Authorization") String authHeader,
       @RequestParam Long userId) {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
@@ -117,15 +118,15 @@ public class UserFileController {
     if (!user.getApp().getId().equals(appId))
       throw new RuntimeException("Usuário não pertence a este App");
 
-    List<UserFileResponse> responseList = userFileRepository.findByAppAndUser(app, user)
+    List<UserFileResponseDTO> responseList = userFileRepository.findByAppAndUser(app, user)
         .stream().map(this::toDto)
         .collect(Collectors.toList());
 
     return CustomApiResponse.ok(responseList);
   }
 
-  private UserFileResponse toDto(UserFile entity) {
-    UserFileResponse dto = new UserFileResponse();
+  private UserFileResponseDTO toDto(UserFile entity) {
+    UserFileResponseDTO dto = new UserFileResponseDTO();
     dto.setId(entity.getId());
     dto.setFileType(entity.getFileType());
     dto.setFileUrl(entity.getFileUrl());

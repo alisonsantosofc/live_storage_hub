@@ -1,13 +1,12 @@
 package com.alisondev.live_storage_hub.modules.apps.controllers;
 
 import com.alisondev.live_storage_hub.dtos.CustomApiResponse;
-import com.alisondev.live_storage_hub.modules.apps.dtos.AppRegisterRequest;
-import com.alisondev.live_storage_hub.modules.apps.dtos.AppResponse;
+import com.alisondev.live_storage_hub.modules.apps.dtos.RegisterAppDTO;
+import com.alisondev.live_storage_hub.modules.apps.dtos.AppResponseDTO;
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
 import com.alisondev.live_storage_hub.modules.apps.services.RegisterAppService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.web.bind.annotation.*;
@@ -24,15 +23,15 @@ public class RegisterAppController {
 
   @PostMapping("/register")
   @Operation(summary = "Register App", description = "Register new apps.")
-  public CustomApiResponse<AppResponse> registerApp(
+  public CustomApiResponse<AppResponseDTO> registerApp(
       @RequestHeader("X-Admin-Key") String adminKey,
-      @RequestBody AppRegisterRequest body) {
+      @RequestBody RegisterAppDTO body) {
     App app = registerAppService.execute(adminKey, body.getName());
     return CustomApiResponse.ok(toDto(app));
   }
 
-  private AppResponse toDto(App app) {
-    AppResponse dto = new AppResponse();
+  private AppResponseDTO toDto(App app) {
+    AppResponseDTO dto = new AppResponseDTO();
     dto.setId(app.getId());
     dto.setName(app.getName());
     dto.setApiKey(app.getApiKey());

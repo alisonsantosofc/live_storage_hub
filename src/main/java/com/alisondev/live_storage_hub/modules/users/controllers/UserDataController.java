@@ -1,8 +1,8 @@
 package com.alisondev.live_storage_hub.modules.users.controllers;
 
-import com.alisondev.live_storage_hub.dtos.*;
-import com.alisondev.live_storage_hub.dtos.user_data.UserDataRequest;
-import com.alisondev.live_storage_hub.dtos.user_data.UserDataResponse;
+import com.alisondev.live_storage_hub.dtos.CustomApiResponse;
+import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDataDTO;
+import com.alisondev.live_storage_hub.modules.users.dtos.UserDataResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.entities.UserData;
 import com.alisondev.live_storage_hub.modules.users.services.UserDataService;
 import com.alisondev.live_storage_hub.security.JwtUtil;
@@ -29,9 +29,9 @@ public class UserDataController {
 
   @Operation(summary = "Registro de dados do usuário", description = "Realiza registro de dados do usuário.")
   @PostMapping
-  public CustomApiResponse<UserDataResponse> saveData(@RequestHeader("Authorization") String authHeader,
+  public CustomApiResponse<UserDataResponseDTO> saveData(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId,
-      @RequestBody UserDataRequest request) {
+      @RequestBody RegisterUserDataDTO request) {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
     UserData data = userDataService.saveData(appId, userId, request);
@@ -40,17 +40,17 @@ public class UserDataController {
 
   @Operation(summary = "Listagem de dados do usuário", description = "Lista todos os dados do usuário.")
   @GetMapping
-  public CustomApiResponse<List<UserDataResponse>> listData(@RequestHeader("Authorization") String authHeader,
+  public CustomApiResponse<List<UserDataResponseDTO>> listData(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId) {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
-    List<UserDataResponse> list = userDataService.listData(appId, userId)
+    List<UserDataResponseDTO> list = userDataService.listData(appId, userId)
         .stream().map(this::toDto).collect(Collectors.toList());
     return CustomApiResponse.ok(list);
   }
 
-  private UserDataResponse toDto(UserData data) {
-    UserDataResponse dto = new UserDataResponse();
+  private UserDataResponseDTO toDto(UserData data) {
+    UserDataResponseDTO dto = new UserDataResponseDTO();
     dto.setId(data.getId());
     dto.setJsonData(data.getJsonData());
     dto.setCreatedAt(data.getCreatedAt());

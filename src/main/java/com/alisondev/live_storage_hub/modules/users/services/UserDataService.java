@@ -1,12 +1,12 @@
 package com.alisondev.live_storage_hub.modules.users.services;
 
-import com.alisondev.live_storage_hub.dtos.user_data.UserDataRequest;
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
-import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
 import com.alisondev.live_storage_hub.modules.users.entities.User;
 import com.alisondev.live_storage_hub.modules.users.entities.UserData;
-import com.alisondev.live_storage_hub.modules.users.repositories.UserDataRepository;
+import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
 import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
+import com.alisondev.live_storage_hub.modules.users.repositories.UserDataRepository;
+import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDataDTO;
 
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,7 @@ public class UserDataService {
     this.userDataRepository = userDataRepository;
   }
 
-  public UserData saveData(Long appId, Long userId, UserDataRequest request) {
+  public UserData saveData(Long appId, Long userId, RegisterUserDataDTO request) {
     App app = appRepository.findById(appId)
         .orElseThrow(() -> new RuntimeException("App não encontrado"));
     User user = userRepository.findById(userId)

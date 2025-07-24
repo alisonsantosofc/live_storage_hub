@@ -1,21 +1,20 @@
 package com.alisondev.live_storage_hub.modules.users.services;
 
-import com.alisondev.live_storage_hub.dtos.*;
-import com.alisondev.live_storage_hub.dtos.auth.AuthResponse;
-import com.alisondev.live_storage_hub.dtos.auth.LoginRequest;
-import com.alisondev.live_storage_hub.dtos.user.UserRegisterRequest;
-import com.alisondev.live_storage_hub.dtos.user.UserResponse;
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
-import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
 import com.alisondev.live_storage_hub.modules.users.entities.User;
+import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
 import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
+import com.alisondev.live_storage_hub.modules.users.dtos.AuthResponseDTO;
+import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserDTO;
+import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDTO;
+import com.alisondev.live_storage_hub.modules.users.dtos.UserResponseDTO;
 import com.alisondev.live_storage_hub.security.JwtUtil;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
-
   private final AppRepository appRepository;
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
@@ -31,7 +30,7 @@ public class AuthService {
     this.jwtUtil = jwtUtil;
   }
 
-  public User register(String apiKey, UserRegisterRequest request) {
+  public User register(String apiKey, RegisterUserDTO request) {
     App app = appRepository.findByApiKey(apiKey)
         .orElseThrow(() -> new RuntimeException("App não encontrado"));
 
@@ -49,7 +48,7 @@ public class AuthService {
     return userRepository.save(user);
   }
 
-  public AuthResponse login(String apiKey, LoginRequest request) {
+  public AuthResponseDTO login(String apiKey, LoginUserDTO request) {
     App app = appRepository.findByApiKey(apiKey)
         .orElseThrow(() -> new RuntimeException("App não encontrado"));
 
@@ -60,13 +59,12 @@ public class AuthService {
       throw new RuntimeException("Senha inválida");
     }
 
-    // ✅ Agora passando email e appId para gerar o token
     String token = jwtUtil.generateToken(user.getEmail(), app.getId());
 
-    AuthResponse response = new AuthResponse();
+    AuthResponseDTO response = new AuthResponseDTO();
     response.setToken(token);
 
-    UserResponse userResponse = new UserResponse();
+    UserResponseDTO userResponse = new UserResponseDTO();
     userResponse.setId(user.getId());
     userResponse.setName(user.getName());
     userResponse.setEmail(user.getEmail());

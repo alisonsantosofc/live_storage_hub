@@ -1,10 +1,10 @@
 package com.alisondev.live_storage_hub.modules.users.controllers;
 
-import com.alisondev.live_storage_hub.dtos.*;
-import com.alisondev.live_storage_hub.dtos.auth.AuthResponse;
-import com.alisondev.live_storage_hub.dtos.auth.LoginRequest;
-import com.alisondev.live_storage_hub.dtos.user.UserRegisterRequest;
-import com.alisondev.live_storage_hub.dtos.user.UserResponse;
+import com.alisondev.live_storage_hub.dtos.CustomApiResponse;
+import com.alisondev.live_storage_hub.modules.users.dtos.AuthResponseDTO;
+import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserDTO;
+import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDTO;
+import com.alisondev.live_storage_hub.modules.users.dtos.UserResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.entities.User;
 import com.alisondev.live_storage_hub.modules.users.services.AuthService;
 
@@ -25,21 +25,21 @@ public class AuthController {
 
   @Operation(summary = "Registro de usuário", description = "Realiza registro de usuário e retorna dados do usuário.")
   @PostMapping("/register")
-  public CustomApiResponse<UserResponse> register(@RequestHeader("X-Api-Key") String apiKey,
-      @RequestBody UserRegisterRequest request) {
+  public CustomApiResponse<UserResponseDTO> register(@RequestHeader("X-Api-Key") String apiKey,
+      @RequestBody RegisterUserDTO request) {
     User user = authService.register(apiKey, request);
     return CustomApiResponse.ok(toDto(user));
   }
 
   @Operation(summary = "Login do usuário", description = "Realiza autenticação e retorna JWT.")
   @PostMapping("/login")
-  public CustomApiResponse<AuthResponse> login(@RequestHeader("X-Api-Key") String apiKey,
-      @RequestBody LoginRequest request) {
+  public CustomApiResponse<AuthResponseDTO> login(@RequestHeader("X-Api-Key") String apiKey,
+      @RequestBody LoginUserDTO request) {
     return CustomApiResponse.ok(authService.login(apiKey, request));
   }
 
-  private UserResponse toDto(User user) {
-    UserResponse dto = new UserResponse();
+  private UserResponseDTO toDto(User user) {
+    UserResponseDTO dto = new UserResponseDTO();
     dto.setId(user.getId());
     dto.setName(user.getName());
     dto.setEmail(user.getEmail());
