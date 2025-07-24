@@ -23,7 +23,7 @@ public class RegisterAppController {
 
   @PostMapping("/register")
   @Operation(summary = "Register App", description = "Register new apps.")
-  public CustomApiResponse<AppResponseDTO> registerApp(
+  public CustomApiResponse<AppResponseDTO> handle(
       @RequestHeader("X-Admin-Key") String adminKey,
       @RequestBody RegisterAppDTO body) {
     App app = registerAppService.execute(adminKey, body.getName());

@@ -6,7 +6,6 @@ import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
 import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
 import com.alisondev.live_storage_hub.modules.users.dtos.AuthResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserDTO;
-import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDTO;
 import com.alisondev.live_storage_hub.modules.users.dtos.UserResponseDTO;
 import com.alisondev.live_storage_hub.security.JwtUtil;
 
@@ -14,13 +13,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthService {
+public class LoginUserService {
   private final AppRepository appRepository;
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
 
-  public AuthService(AppRepository appRepository,
+  public LoginUserService(AppRepository appRepository,
       UserRepository userRepository,
       PasswordEncoder passwordEncoder,
       JwtUtil jwtUtil) {
@@ -30,25 +29,7 @@ public class AuthService {
     this.jwtUtil = jwtUtil;
   }
 
-  public User register(String apiKey, RegisterUserDTO request) {
-    App app = appRepository.findByApiKey(apiKey)
-        .orElseThrow(() -> new RuntimeException("App não encontrado"));
-
-    if (userRepository.findByAppAndEmail(app, request.getEmail()).isPresent()) {
-      throw new RuntimeException("Usuário já existe para este App");
-    }
-
-    User user = User.builder()
-        .app(app)
-        .name(request.getName())
-        .email(request.getEmail())
-        .password(passwordEncoder.encode(request.getPassword()))
-        .build();
-
-    return userRepository.save(user);
-  }
-
-  public AuthResponseDTO login(String apiKey, LoginUserDTO request) {
+  public AuthResponseDTO execute(String apiKey, LoginUserDTO request) {
     App app = appRepository.findByApiKey(apiKey)
         .orElseThrow(() -> new RuntimeException("App não encontrado"));
 

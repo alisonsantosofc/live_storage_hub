@@ -25,7 +25,7 @@ public class ListAppsController {
 
   @GetMapping
   @Operation(summary = "List Apps", description = "List all registered apps.")
-  public CustomApiResponse<List<AppResponseDTO>> listApps(
+  public CustomApiResponse<List<AppResponseDTO>> handle(
       @RequestHeader("X-Admin-Key") String adminKey) {
     List<AppResponseDTO> apps = listAppsService.execute(adminKey).stream()
         .map(this::toDto)
