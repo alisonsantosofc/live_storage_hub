@@ -24,12 +24,11 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user_file")
 @Tag(name = "User File", description = "Endpoints para arquivos de usuários.")
-public class UserFileController {
+public class RegisterUserFileController {
   private final AppRepository appRepository;
   private final UserRepository userRepository;
   private final UserFileRepository userFileRepository;
@@ -38,7 +37,7 @@ public class UserFileController {
   private final S3Client s3Client;
 
   @Autowired
-  public UserFileController(AppRepository appRepository, UserRepository userRepository,
+  public RegisterUserFileController(AppRepository appRepository, UserRepository userRepository,
       UserFileRepository userFileRepository, JwtUtil jwtUtil,
       StorageConfig storageConfig, @Autowired(required = false) S3Client s3Client) {
     this.appRepository = appRepository;
@@ -51,7 +50,7 @@ public class UserFileController {
 
   @Operation(summary = "Upload de arquivos do usuário", description = "Realiza upload de arquivos do usuário.")
   @PostMapping("/upload")
-  public CustomApiResponse<UserFileResponseDTO> uploadFile(@RequestHeader("Authorization") String authHeader,
+  public CustomApiResponse<UserFileResponseDTO> handle(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId,
       @RequestParam("file") MultipartFile file,
       @RequestParam("fileType") String fileType) throws IOException {
@@ -103,26 +102,6 @@ public class UserFileController {
     userFileRepository.save(userFile);
 
     return CustomApiResponse.ok(toDto(userFile));
-  }
-
-  @Operation(summary = "Listagem de arquivos do usuário", description = "Lista todos os arquivos do usuário.")
-  @GetMapping("/list")
-  public CustomApiResponse<List<UserFileResponseDTO>> listFiles(@RequestHeader("Authorization") String authHeader,
-      @RequestParam Long userId) {
-    String token = authHeader.substring(7);
-    Long appId = jwtUtil.getAppIdFromToken(token);
-
-    App app = appRepository.findById(appId).orElseThrow(() -> new RuntimeException("App não encontrado"));
-    User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-    if (!user.getApp().getId().equals(appId))
-      throw new RuntimeException("Usuário não pertence a este App");
-
-    List<UserFileResponseDTO> responseList = userFileRepository.findByAppAndUser(app, user)
-        .stream().map(this::toDto)
-        .collect(Collectors.toList());
-
-    return CustomApiResponse.ok(responseList);
   }
 
   private UserFileResponseDTO toDto(UserFile entity) {
