@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user_data")
-@Tag(name = "User Data", description = "Endpoints para dados de usuários.")
+@Tag(name = "User Data", description = "Endpoints for managing user data.")
 public class ListUserDataController {
   private final ListUserDataService listUserDataService;
   private final JwtUtil jwtUtil;
@@ -26,7 +26,7 @@ public class ListUserDataController {
     this.jwtUtil = jwtUtil;
   }
 
-  @Operation(summary = "Listagem de dados do usuário", description = "Lista todos os dados do usuário.")
+  @Operation(summary = "List user data", description = "Lists all registered user data.")
   @GetMapping("/list")
   public CustomApiResponse<List<UserDataResponseDTO>> handle(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId) {

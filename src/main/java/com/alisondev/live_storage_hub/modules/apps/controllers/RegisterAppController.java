@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/apps")
-@Tag(name = "Apps", description = "Endpoints for apps.")
+@Tag(name = "Apps", description = "Endpoints for managing apps.")
 public class RegisterAppController {
   private final RegisterAppService registerAppService;
 
@@ -22,7 +22,7 @@ public class RegisterAppController {
   }
 
   @PostMapping("/register")
-  @Operation(summary = "Register App", description = "Register new apps.")
+  @Operation(summary = "Register app", description = "Registers new apps.")
   public CustomApiResponse<AppResponseDTO> handle(
       @RequestHeader("X-Admin-Key") String adminKey,
       @RequestBody RegisterAppDTO body) {

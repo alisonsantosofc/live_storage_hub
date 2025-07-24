@@ -31,7 +31,7 @@ public class RegisterAppService {
 
   private void validateAdminKey(String adminKey) {
     if (!adminApiKey.equals(adminKey)) {
-      throw new RuntimeException("Acesso negado: admin key inválida");
+      throw new RuntimeException("[APP_ERROR]: Access denied, invalid admin key");
     }
   }
 }

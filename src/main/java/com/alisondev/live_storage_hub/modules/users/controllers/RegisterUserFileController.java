@@ -28,10 +28,7 @@ public class RegisterUserFileController {
     this.jwtUtil = jwtUtil;
   }
 
-  @Operation(
-    summary = "Upload user files", 
-    description = "Uploads files to the user's account, allowing them to be stored in the system."
-  )
+  @Operation(summary = "Upload user file", description = "Registers and upload new user file.")
   @PostMapping("/upload")
   public CustomApiResponse<UserFileResponseDTO> handle(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId,

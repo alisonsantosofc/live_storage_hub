@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/sessions")
-@Tag(name = "Authentication", description = "Endpoints para autenticação.")
+@Tag(name = "Authentication", description = "Endpoints for users authentication.")
 public class LoginUserController {
   private final LoginUserService loginUserService;
 
@@ -20,7 +20,7 @@ public class LoginUserController {
     this.loginUserService = loginUserService;
   }
 
-  @Operation(summary = "Login do usuário", description = "Realiza autenticação e retorna JWT.")
+  @Operation(summary = "Login user", description = "Authenticate user and return token.")
   @PostMapping("/login")
   public CustomApiResponse<AuthResponseDTO> handle(@RequestHeader("X-Api-Key") String apiKey,
       @RequestBody LoginUserDTO request) {

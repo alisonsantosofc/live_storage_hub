@@ -28,10 +28,7 @@ public class ListUserFileController {
     this.jwtUtil = jwtUtil;
   }
 
-  @Operation(
-    summary = "List user files", 
-    description = "Get the list of files owned by the user, including their details and metadata."
-  )
+  @Operation(summary = "List user file", description = "Lists all registered user file.")
   @GetMapping("/list")
   public CustomApiResponse<List<UserFileResponseDTO>> handle(@RequestHeader("Authorization") String authHeader,
       @RequestParam Long userId) {

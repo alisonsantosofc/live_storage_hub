@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/apps")
-@Tag(name = "Apps", description = "Endpoints for apps.")
+@Tag(name = "Apps", description = "Endpoints for managing apps.")
 public class ListAppsController {
   private final ListAppsService listAppsService;
 
@@ -24,7 +24,7 @@ public class ListAppsController {
   }
 
   @GetMapping
-  @Operation(summary = "List Apps", description = "List all registered apps.")
+  @Operation(summary = "List apps", description = "Lists all registered apps.")
   public CustomApiResponse<List<AppResponseDTO>> handle(
       @RequestHeader("X-Admin-Key") String adminKey) {
     List<AppResponseDTO> apps = listAppsService.execute(adminKey).stream()

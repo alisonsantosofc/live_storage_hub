@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user_data")
-@Tag(name = "User Data", description = "Endpoints para dados de usuários.")
+@Tag(name = "User Data", description = "Endpoints for managing user data.")
 public class RegisterUserDataController {
   private final RegisterUserDataService registerUserDataService;
   private final JwtUtil jwtUtil;
@@ -24,7 +24,7 @@ public class RegisterUserDataController {
     this.jwtUtil = jwtUtil;
   }
 
-  @Operation(summary = "Registro de dados do usuário", description = "Realiza registro de dados do usuário.")
+  @Operation(summary = "Register user data", description = "Registers new user data.")
   @PostMapping("/register")
   public CustomApiResponse<UserDataResponseDTO> handle(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId,

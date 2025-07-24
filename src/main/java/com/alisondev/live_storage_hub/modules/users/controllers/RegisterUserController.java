@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
-@Tag(name = "Users", description = "Endpoints para usuários.")
+@Tag(name = "Users", description = "Endpoints for managing users.")
 public class RegisterUserController {
   private final RegisterUserService registerUserService;
 
@@ -21,7 +21,7 @@ public class RegisterUserController {
     this.registerUserService = registerUserService;
   }
 
-  @Operation(summary = "Registro de usuário", description = "Realiza registro de usuário e retorna dados do usuário.")
+  @Operation(summary = "Registro de usuário", description = "Registers new user and return user info.")
   @PostMapping("/register")
   public CustomApiResponse<UserResponseDTO> handle(@RequestHeader("X-Api-Key") String apiKey,
       @RequestBody RegisterUserDTO request) {
