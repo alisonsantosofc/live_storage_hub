@@ -1,12 +1,14 @@
 package com.alisondev.live_storage_hub.controller;
 
-import com.alisondev.live_storage_hub.dtos.auth.AuthResponse;
-import com.alisondev.live_storage_hub.dtos.auth.LoginRequest;
 import com.alisondev.live_storage_hub.modules.users.controllers.AuthController;
+import com.alisondev.live_storage_hub.modules.users.dtos.AuthResponseDTO;
+import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserDTO;
 import com.alisondev.live_storage_hub.modules.users.services.AuthService;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,20 +31,20 @@ class AuthControllerTest {
 
   @Test
   void login_shouldReturnOk() throws Exception {
-    LoginRequest loginRequest = new LoginRequest();
-    loginRequest.setEmail("user@test.com");
-    loginRequest.setPassword("123456");
+    LoginUserDTO loginUserDTO = new LoginUserDTO();
+    loginUserDTO.setEmail("user@test.com");
+    loginUserDTO.setPassword("123456");
 
-    AuthResponse response = new AuthResponse();
+    AuthResponseDTO response = new AuthResponseDTO();
     response.setToken("fake-jwt-token");
 
-    Mockito.when(authService.login(Mockito.eq("apikey123"), Mockito.any(LoginRequest.class)))
+    Mockito.when(authService.login(Mockito.eq("apikey123"), Mockito.any(LoginUserDTO.class)))
         .thenReturn(response);
 
     mockMvc.perform(post("/auth/login")
         .header("X-API-KEY", "apikey123")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(loginRequest)))
+        .content(objectMapper.writeValueAsString(loginUserDTO)))
         .andExpect(status().isOk());
   }
 }

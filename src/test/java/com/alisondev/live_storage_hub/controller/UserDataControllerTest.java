@@ -1,15 +1,17 @@
 package com.alisondev.live_storage_hub.controller;
 
-import com.alisondev.live_storage_hub.dtos.user_data.UserDataRequest;
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
-import com.alisondev.live_storage_hub.modules.users.controllers.UserDataController;
 import com.alisondev.live_storage_hub.modules.users.entities.User;
 import com.alisondev.live_storage_hub.modules.users.entities.UserData;
+import com.alisondev.live_storage_hub.modules.users.controllers.UserDataController;
+import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDataDTO;
 import com.alisondev.live_storage_hub.modules.users.services.UserDataService;
 import com.alisondev.live_storage_hub.security.JwtUtil;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -45,7 +47,7 @@ class UserDataControllerTest {
     Long userId = 10L;
     Map<String, Object> json = Map.of("level", "easy");
 
-    UserDataRequest request = new UserDataRequest();
+    RegisterUserDataDTO request = new RegisterUserDataDTO();
     request.setJsonData(json);
 
     App app = App.builder().id(appId).name("TestApp").apiKey("abc").createdAt(LocalDateTime.now()).build();
@@ -61,7 +63,7 @@ class UserDataControllerTest {
         .build();
 
     Mockito.when(jwtUtil.getAppIdFromToken("mock-token")).thenReturn(appId);
-    Mockito.when(userDataService.saveData(Mockito.eq(appId), Mockito.eq(userId), Mockito.any(UserDataRequest.class)))
+    Mockito.when(userDataService.saveData(Mockito.eq(appId), Mockito.eq(userId), Mockito.any(RegisterUserDataDTO.class)))
         .thenReturn(userData);
 
     mockMvc.perform(post("/userdata")
