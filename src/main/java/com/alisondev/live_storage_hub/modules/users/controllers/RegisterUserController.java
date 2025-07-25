@@ -1,6 +1,6 @@
 package com.alisondev.live_storage_hub.modules.users.controllers;
 
-import com.alisondev.live_storage_hub.dtos.CustomApiResponse;
+import com.alisondev.live_storage_hub.dtos.ApiResponse;
 import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDTO;
 import com.alisondev.live_storage_hub.modules.users.dtos.UserResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.entities.User;
@@ -23,10 +23,10 @@ public class RegisterUserController {
 
   @Operation(summary = "Registro de usuário", description = "Registers new user and return user info.")
   @PostMapping("/register")
-  public CustomApiResponse<UserResponseDTO> handle(@RequestHeader("X-Api-Key") String apiKey,
+  public ApiResponse<UserResponseDTO> handle(@RequestHeader("X-Api-Key") String apiKey,
       @RequestBody RegisterUserDTO request) {
     User user = registerUserService.execute(apiKey, request);
-    return CustomApiResponse.ok(toDto(user));
+    return ApiResponse.ok(toDto(user));
   }
 
   private UserResponseDTO toDto(User user) {

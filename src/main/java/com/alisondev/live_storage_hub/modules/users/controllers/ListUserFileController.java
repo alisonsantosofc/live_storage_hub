@@ -3,7 +3,7 @@ package com.alisondev.live_storage_hub.modules.users.controllers;
 import com.alisondev.live_storage_hub.modules.users.entities.UserFile;
 import com.alisondev.live_storage_hub.modules.users.dtos.UserFileResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.services.ListUserFileService;
-import com.alisondev.live_storage_hub.dtos.CustomApiResponse;
+import com.alisondev.live_storage_hub.dtos.ApiResponse;
 import com.alisondev.live_storage_hub.security.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,7 +30,7 @@ public class ListUserFileController {
 
   @Operation(summary = "List user file", description = "Lists all registered user file.")
   @GetMapping("/list")
-  public CustomApiResponse<List<UserFileResponseDTO>> handle(@RequestHeader("Authorization") String authHeader,
+  public ApiResponse<List<UserFileResponseDTO>> handle(@RequestHeader("Authorization") String authHeader,
       @RequestParam Long userId) {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
@@ -38,7 +38,7 @@ public class ListUserFileController {
     List<UserFileResponseDTO> list = listUserFileService.execute(appId, userId)
         .stream().map(this::toDto).collect(Collectors.toList());
 
-    return CustomApiResponse.ok(list);
+    return ApiResponse.ok(list);
   }
 
   private UserFileResponseDTO toDto(UserFile entity) {

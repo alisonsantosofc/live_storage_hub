@@ -1,6 +1,6 @@
 package com.alisondev.live_storage_hub.modules.users.controllers;
 
-import com.alisondev.live_storage_hub.dtos.CustomApiResponse;
+import com.alisondev.live_storage_hub.dtos.ApiResponse;
 import com.alisondev.live_storage_hub.modules.users.dtos.UserDataResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.entities.UserData;
 import com.alisondev.live_storage_hub.modules.users.services.ListUserDataService;
@@ -28,13 +28,13 @@ public class ListUserDataController {
 
   @Operation(summary = "List user data", description = "Lists all registered user data.")
   @GetMapping("/list")
-  public CustomApiResponse<List<UserDataResponseDTO>> handle(@RequestHeader("Authorization") String authHeader,
+  public ApiResponse<List<UserDataResponseDTO>> handle(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId) {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
     List<UserDataResponseDTO> list = listUserDataService.execute(appId, userId)
         .stream().map(this::toDto).collect(Collectors.toList());
-    return CustomApiResponse.ok(list);
+    return ApiResponse.ok(list);
   }
 
   private UserDataResponseDTO toDto(UserData data) {

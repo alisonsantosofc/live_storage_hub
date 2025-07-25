@@ -1,6 +1,6 @@
 package com.alisondev.live_storage_hub.modules.users.controllers;
 
-import com.alisondev.live_storage_hub.dtos.CustomApiResponse;
+import com.alisondev.live_storage_hub.dtos.ApiResponse;
 import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDataDTO;
 import com.alisondev.live_storage_hub.modules.users.dtos.UserDataResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.entities.UserData;
@@ -26,13 +26,13 @@ public class RegisterUserDataController {
 
   @Operation(summary = "Register user data", description = "Registers new user data.")
   @PostMapping("/register")
-  public CustomApiResponse<UserDataResponseDTO> handle(@RequestHeader("Authorization") String authHeader,
+  public ApiResponse<UserDataResponseDTO> handle(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId,
       @RequestBody RegisterUserDataDTO request) {
     String token = authHeader.substring(7);
     Long appId = jwtUtil.getAppIdFromToken(token);
     UserData data = registerUserDataService.execute(appId, userId, request);
-    return CustomApiResponse.ok(toDto(data));
+    return ApiResponse.ok(toDto(data));
   }
 
   private UserDataResponseDTO toDto(UserData data) {

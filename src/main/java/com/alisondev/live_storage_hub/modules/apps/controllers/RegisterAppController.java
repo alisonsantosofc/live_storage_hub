@@ -1,6 +1,6 @@
 package com.alisondev.live_storage_hub.modules.apps.controllers;
 
-import com.alisondev.live_storage_hub.dtos.CustomApiResponse;
+import com.alisondev.live_storage_hub.dtos.ApiResponse;
 import com.alisondev.live_storage_hub.modules.apps.dtos.RegisterAppDTO;
 import com.alisondev.live_storage_hub.modules.apps.dtos.AppResponseDTO;
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
@@ -23,11 +23,11 @@ public class RegisterAppController {
 
   @PostMapping("/register")
   @Operation(summary = "Register app", description = "Registers new apps.")
-  public CustomApiResponse<AppResponseDTO> handle(
+  public ApiResponse<AppResponseDTO> handle(
       @RequestHeader("X-Admin-Key") String adminKey,
       @RequestBody RegisterAppDTO body) {
     App app = registerAppService.execute(adminKey, body.getName());
-    return CustomApiResponse.ok(toDto(app));
+    return ApiResponse.ok(toDto(app));
   }
 
   private AppResponseDTO toDto(App app) {

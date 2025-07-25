@@ -1,6 +1,6 @@
 package com.alisondev.live_storage_hub.modules.users.controllers;
 
-import com.alisondev.live_storage_hub.dtos.CustomApiResponse;
+import com.alisondev.live_storage_hub.dtos.ApiResponse;
 import com.alisondev.live_storage_hub.modules.users.dtos.AuthResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserDTO;
 import com.alisondev.live_storage_hub.modules.users.services.LoginUserService;
@@ -22,8 +22,8 @@ public class LoginUserController {
 
   @Operation(summary = "Login user", description = "Authenticate user and return token.")
   @PostMapping("/login")
-  public CustomApiResponse<AuthResponseDTO> handle(@RequestHeader("X-Api-Key") String apiKey,
+  public ApiResponse<AuthResponseDTO> handle(@RequestHeader("X-Api-Key") String apiKey,
       @RequestBody LoginUserDTO request) {
-    return CustomApiResponse.ok(loginUserService.execute(apiKey, request));
+    return ApiResponse.ok(loginUserService.execute(apiKey, request));
   }
 }
