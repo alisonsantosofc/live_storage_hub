@@ -2,6 +2,9 @@ package com.alisondev.live_storage_hub.modules.apps.services;
 
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
 import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
+import com.alisondev.live_storage_hub.modules.apps.errors.AppsErrorPrefix;
+import com.alisondev.live_storage_hub.exceptions.ApiRuntimeException;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +17,16 @@ public class RegisterAppService {
   @Value("${admin.api-key}")
   private String adminApiKey;
 
+  private final String prefix = AppsErrorPrefix.MODULE + "." + AppsErrorPrefix.ROUTE_REGISTER_APP + ".";
+
   public RegisterAppService(AppRepository appRepository) {
     this.appRepository = appRepository;
   }
 
   public App execute(String adminKey, String appName) {
-    validateAdminKey(adminKey);
+    if (!adminApiKey.equals(adminKey)) {
+      throw new ApiRuntimeException(prefix + 1, "Access denied, invalid admin key.");
+    }
 
     App app = App.builder()
         .name(appName)
@@ -27,11 +34,5 @@ public class RegisterAppService {
         .build();
 
     return appRepository.save(app);
-  }
-
-  private void validateAdminKey(String adminKey) {
-    if (!adminApiKey.equals(adminKey)) {
-      throw new RuntimeException("[APP_ERROR]: Access denied, invalid admin key");
-    }
   }
 }

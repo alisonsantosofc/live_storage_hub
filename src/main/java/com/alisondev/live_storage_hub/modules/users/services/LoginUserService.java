@@ -1,5 +1,6 @@
 package com.alisondev.live_storage_hub.modules.users.services;
 
+
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
 import com.alisondev.live_storage_hub.modules.users.entities.User;
 import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
@@ -7,7 +8,10 @@ import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
 import com.alisondev.live_storage_hub.modules.users.dtos.AuthResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserDTO;
 import com.alisondev.live_storage_hub.modules.users.dtos.UserResponseDTO;
+import com.alisondev.live_storage_hub.modules.users.errors.UsersErrorPrefix;
+import com.alisondev.live_storage_hub.exceptions.ApiRuntimeException;
 import com.alisondev.live_storage_hub.security.JwtUtil;
+
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,7 @@ public class LoginUserService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
+  private final String prefix = UsersErrorPrefix.MODULE + "." + UsersErrorPrefix.ROUTE_LOGIN_USER + ".";
 
   public LoginUserService(AppRepository appRepository,
       UserRepository userRepository,
@@ -31,13 +36,13 @@ public class LoginUserService {
 
   public AuthResponseDTO execute(String apiKey, LoginUserDTO request) {
     App app = appRepository.findByApiKey(apiKey)
-        .orElseThrow(() -> new RuntimeException("App not found or invalid api key."));
+        .orElseThrow(() -> new ApiRuntimeException(prefix + 1, "App not found or invalid api key."));
 
     User user = userRepository.findByAppAndEmail(app, request.getEmail())
-        .orElseThrow(() -> new RuntimeException("User not found or invalid."));
+        .orElseThrow(() -> new ApiRuntimeException(prefix + 2, "User not found or invalid user id."));
 
     if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-      throw new RuntimeException("Invalid email or password.");
+      throw new ApiRuntimeException(prefix + 3, "Invalid email or password.");
     }
 
     String token = jwtUtil.generateToken(user.getEmail(), app.getId());

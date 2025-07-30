@@ -6,6 +6,8 @@ import com.alisondev.live_storage_hub.modules.users.entities.UserData;
 import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
 import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
 import com.alisondev.live_storage_hub.modules.users.repositories.UserDataRepository;
+import com.alisondev.live_storage_hub.modules.users.errors.UsersErrorPrefix;
+import com.alisondev.live_storage_hub.exceptions.ApiRuntimeException;
 
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ public class ListUserDataService {
   private final AppRepository appRepository;
   private final UserRepository userRepository;
   private final UserDataRepository userDataRepository;
+  private final String prefix = UsersErrorPrefix.MODULE + "." + UsersErrorPrefix.ROUTE_REGISTER_USER_DATA + ".";
 
   public ListUserDataService(AppRepository appRepository, UserRepository userRepository,
       UserDataRepository userDataRepository) {
@@ -26,12 +29,12 @@ public class ListUserDataService {
 
   public List<UserData> execute(Long appId, Long userId) {
     App app = appRepository.findById(appId)
-        .orElseThrow(() -> new RuntimeException("App não encontrado"));
+        .orElseThrow(() -> new ApiRuntimeException(prefix + 1, "App not found or invalid api key."));
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        .orElseThrow(() -> new ApiRuntimeException(prefix + 1, "User not found or invalid user id."));
 
     if (!user.getApp().getId().equals(appId)) {
-      throw new RuntimeException("Usuário não pertence a este App");
+      throw new ApiRuntimeException(prefix + 1, "User does not registered to this app.");
     }
 
     return userDataRepository.findByAppAndUser(app, user);

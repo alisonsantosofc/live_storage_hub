@@ -27,8 +27,6 @@ public class LoginUserController {
   @Operation(summary = "Login user", description = "Authenticate user and return token.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Successful login", content = @Content(schema = @Schema(implementation = AuthResponseDTO.class))),
-      @ApiResponse(responseCode = "401", description = "Invalid API key or invalid email/password", content = @Content),
-      @ApiResponse(responseCode = "404", description = "App or User not found", content = @Content)
   })
   @PostMapping("/login")
   public SendApiResponse<AuthResponseDTO> handle(@RequestHeader("X-Api-Key") String apiKey,

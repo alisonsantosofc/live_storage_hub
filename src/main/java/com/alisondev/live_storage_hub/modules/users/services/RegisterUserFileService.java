@@ -1,11 +1,13 @@
 package com.alisondev.live_storage_hub.modules.users.services;
 
-import com.alisondev.live_storage_hub.config.StorageConfig;
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
 import com.alisondev.live_storage_hub.modules.users.entities.User;
 import com.alisondev.live_storage_hub.modules.users.entities.UserFile;
 import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
 import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
+import com.alisondev.live_storage_hub.modules.users.errors.UsersErrorPrefix;
+import com.alisondev.live_storage_hub.exceptions.ApiRuntimeException;
+import com.alisondev.live_storage_hub.config.StorageConfig;
 
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -31,6 +33,7 @@ public class RegisterUserFileService {
   private final UserFileRepository userFileRepository;
   private final StorageConfig storageConfig;
   private final S3Client s3Client;
+  private final String prefix = UsersErrorPrefix.MODULE + "." + UsersErrorPrefix.ROUTE_REGISTER_USER_FILE + ".";
 
   public RegisterUserFileService(AppRepository appRepository, UserRepository userRepository,
       UserFileRepository userFileRepository, StorageConfig storageConfig,
@@ -44,12 +47,12 @@ public class RegisterUserFileService {
 
   public UserFile execute(Long appId, Long userId, MultipartFile file, String fileType) throws IOException {
     App app = appRepository.findById(appId)
-        .orElseThrow(() -> new RuntimeException("App não encontrado"));
+        .orElseThrow(() -> new ApiRuntimeException(prefix + 1, "App not found or invalid api key."));
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        .orElseThrow(() -> new ApiRuntimeException(prefix + 2, "User not found or invalid user id."));
 
     if (!user.getApp().getId().equals(appId))
-      throw new RuntimeException("Usuário não pertence a este App");
+      throw new ApiRuntimeException(prefix + 3, "User does not registered to this app.");
 
     String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
     String fileUrl;
@@ -66,7 +69,7 @@ public class RegisterUserFileService {
       fileUrl = destination.toAbsolutePath().toString();
     } else if ("s3".equalsIgnoreCase(storageConfig.getStorageMode())) {
       if (s3Client == null)
-        throw new RuntimeException("S3 não está configurado");
+        throw new ApiRuntimeException(prefix + 4, "S3 is not configured.");
 
       s3Client.putObject(
           PutObjectRequest.builder()
@@ -77,7 +80,7 @@ public class RegisterUserFileService {
 
       fileUrl = "https://" + storageConfig.getBucketName() + ".s3.amazonaws.com/" + fileName;
     } else {
-      throw new RuntimeException("Configuração de storage inválida");
+      throw new ApiRuntimeException(prefix + 5, "Invalid storage config.");
     } 
 
     UserFile userFile = UserFile.builder()

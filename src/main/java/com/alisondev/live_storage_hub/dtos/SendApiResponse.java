@@ -6,15 +6,19 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class SendApiResponse<T> {
-  private boolean success;
+  private String code;
   private String message;
   private T data;
 
   public static <T> SendApiResponse<T> ok(T data) {
-    return new SendApiResponse<>(true, "Success", data);
+    return new SendApiResponse<>( "0", "Success", data);
   }
 
-  public static <T> SendApiResponse<T> error(String message) {
-    return new SendApiResponse<>(false, message, null);
+  public static <T> SendApiResponse<T> ok(String message, T data) {
+    return new SendApiResponse<>("0", message, data);
+  }
+
+  public static <T> SendApiResponse<T> error(String code, String message) {
+    return new SendApiResponse<>(code, message, null);
   }
 }
