@@ -31,13 +31,13 @@ public class LoginUserService {
 
   public AuthResponseDTO execute(String apiKey, LoginUserDTO request) {
     App app = appRepository.findByApiKey(apiKey)
-        .orElseThrow(() -> new RuntimeException("App não encontrado"));
+        .orElseThrow(() -> new RuntimeException("App not found or invalid api key."));
 
     User user = userRepository.findByAppAndEmail(app, request.getEmail())
-        .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        .orElseThrow(() -> new RuntimeException("User not found or invalid."));
 
     if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-      throw new RuntimeException("Senha inválida");
+      throw new RuntimeException("Invalid email or password.");
     }
 
     String token = jwtUtil.generateToken(user.getEmail(), app.getId());

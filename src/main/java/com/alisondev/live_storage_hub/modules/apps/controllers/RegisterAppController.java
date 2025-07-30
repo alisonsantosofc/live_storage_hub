@@ -1,6 +1,6 @@
 package com.alisondev.live_storage_hub.modules.apps.controllers;
 
-import com.alisondev.live_storage_hub.dtos.ApiResponse;
+import com.alisondev.live_storage_hub.dtos.SendApiResponse;
 import com.alisondev.live_storage_hub.modules.apps.dtos.RegisterAppDTO;
 import com.alisondev.live_storage_hub.modules.apps.dtos.AppResponseDTO;
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/apps")
-@Tag(name = "Apps", description = "Endpoints for managing apps.")
+@Tag(name = "Apps", description = "Endpoints for apps.")
 public class RegisterAppController {
   private final RegisterAppService registerAppService;
 
@@ -23,11 +23,11 @@ public class RegisterAppController {
 
   @PostMapping("/register")
   @Operation(summary = "Register app", description = "Registers new apps.")
-  public ApiResponse<AppResponseDTO> handle(
+  public SendApiResponse<AppResponseDTO> handle(
       @RequestHeader("X-Admin-Key") String adminKey,
       @RequestBody RegisterAppDTO body) {
     App app = registerAppService.execute(adminKey, body.getName());
-    return ApiResponse.ok(toDto(app));
+    return SendApiResponse.ok(toDto(app));
   }
 
   private AppResponseDTO toDto(App app) {

@@ -3,7 +3,7 @@ package com.alisondev.live_storage_hub.modules.users.controllers;
 import com.alisondev.live_storage_hub.modules.users.entities.UserFile;
 import com.alisondev.live_storage_hub.modules.users.dtos.UserFileResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.services.RegisterUserFileService;
-import com.alisondev.live_storage_hub.dtos.ApiResponse;
+import com.alisondev.live_storage_hub.dtos.SendApiResponse;
 import com.alisondev.live_storage_hub.security.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +17,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/user_file")
-@Tag(name = "User File", description = "Endpoints for managing user files.")
+@Tag(name = "User File", description = "Endpoints for user files.")
 public class RegisterUserFileController {
   private final RegisterUserFileService registerUserFileService;
   private final JwtUtil jwtUtil;
@@ -30,7 +30,7 @@ public class RegisterUserFileController {
 
   @Operation(summary = "Upload user file", description = "Registers and upload new user file.")
   @PostMapping("/upload")
-  public ApiResponse<UserFileResponseDTO> handle(@RequestHeader("Authorization") String authHeader,
+  public SendApiResponse<UserFileResponseDTO> handle(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId,
       @RequestParam("file") MultipartFile file,
       @RequestParam("fileType") String fileType) throws IOException {
@@ -38,7 +38,7 @@ public class RegisterUserFileController {
     Long appId = jwtUtil.getAppIdFromToken(token);
 
     UserFile data = registerUserFileService.execute(appId, userId, file, fileType);
-    return ApiResponse.ok(toDto(data));
+    return SendApiResponse.ok(toDto(data));
   }
 
   private UserFileResponseDTO toDto(UserFile entity) {
