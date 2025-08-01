@@ -14,6 +14,10 @@ public class SendApiResponse<T> {
     return new SendApiResponse<>( "0", "Success", data);
   }
 
+  public static <T> SendApiResponse<T> ok() {
+    return new SendApiResponse<>( "0", "Success", null);
+  }
+
   public static <T> SendApiResponse<T> ok(String message, T data) {
     return new SendApiResponse<>("0", message, data);
   }
