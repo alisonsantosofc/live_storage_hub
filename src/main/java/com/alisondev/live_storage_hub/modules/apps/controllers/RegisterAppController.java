@@ -2,6 +2,7 @@ package com.alisondev.live_storage_hub.modules.apps.controllers;
 
 import com.alisondev.live_storage_hub.dtos.SendApiResponse;
 import com.alisondev.live_storage_hub.modules.apps.dtos.RegisterAppDTO;
+import com.alisondev.live_storage_hub.modules.apps.dtos.RegisterAppResponseDTO;
 import com.alisondev.live_storage_hub.modules.apps.dtos.AppResponseDTO;
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
 import com.alisondev.live_storage_hub.modules.apps.services.RegisterAppService;
@@ -23,19 +24,16 @@ public class RegisterAppController {
 
   @PostMapping("/register")
   @Operation(summary = "Register app", description = "Registers new apps.")
-  public SendApiResponse<AppResponseDTO> handle(
+  public SendApiResponse<RegisterAppResponseDTO> handle(
       @RequestHeader("X-Admin-Key") String adminKey,
       @RequestBody RegisterAppDTO body) {
     App app = registerAppService.execute(adminKey, body.getName());
     return SendApiResponse.ok(toDto(app));
   }
 
-  private AppResponseDTO toDto(App app) {
-    AppResponseDTO dto = new AppResponseDTO();
+  private RegisterAppResponseDTO toDto(App app) {
+    RegisterAppResponseDTO dto = new RegisterAppResponseDTO();
     dto.setId(app.getId());
-    dto.setName(app.getName());
-    dto.setApiKey(app.getApiKey());
-    dto.setCreatedAt(app.getCreatedAt());
     return dto;
   }
 }

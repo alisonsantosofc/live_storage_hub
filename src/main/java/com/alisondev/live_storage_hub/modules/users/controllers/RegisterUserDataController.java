@@ -2,6 +2,7 @@ package com.alisondev.live_storage_hub.modules.users.controllers;
 
 import com.alisondev.live_storage_hub.dtos.SendApiResponse;
 import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDataDTO;
+import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDataResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.dtos.UserDataResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.entities.UserData;
 import com.alisondev.live_storage_hub.modules.users.services.RegisterUserDataService;
@@ -26,7 +27,7 @@ public class RegisterUserDataController {
 
   @Operation(summary = "Register user data", description = "Registers new user data.")
   @PostMapping("/register")
-  public SendApiResponse<UserDataResponseDTO> handle(@RequestHeader("Authorization") String authHeader,
+  public SendApiResponse<RegisterUserDataResponseDTO> handle(@RequestHeader("Authorization") String authHeader,
       @RequestParam("userId") Long userId,
       @RequestBody RegisterUserDataDTO request) {
     String token = authHeader.substring(7);
@@ -35,11 +36,9 @@ public class RegisterUserDataController {
     return SendApiResponse.ok(toDto(data));
   }
 
-  private UserDataResponseDTO toDto(UserData data) {
-    UserDataResponseDTO dto = new UserDataResponseDTO();
+  private RegisterUserDataResponseDTO toDto(UserData data) {
+    RegisterUserDataResponseDTO dto = new RegisterUserDataResponseDTO();
     dto.setId(data.getId());
-    dto.setJsonData(data.getJsonData());
-    dto.setCreatedAt(data.getCreatedAt());
     return dto;
   }
 }
