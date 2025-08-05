@@ -134,6 +134,12 @@
 			<artifactId>flyway-core</artifactId>
 			<version>10.15.2</version>
 		</dependency>
+
+		<!-- Email -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
 	</dependencies>
 
 	<build>

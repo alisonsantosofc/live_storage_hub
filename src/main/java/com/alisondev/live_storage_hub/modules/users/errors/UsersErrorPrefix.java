@@ -5,10 +5,11 @@ public class UsersErrorPrefix {
 
     public static final int ROUTE_REGISTER_USER = 1;
     public static final int ROUTE_LOGIN_USER = 2;
+    public static final int ROUTE_SEND_VERIFICATION_CODE = 3;
     
-    public static final int ROUTE_REGISTER_USER_DATA = 3;
-    public static final int ROUTE_LIST_USER_DATA = 4;
+    public static final int ROUTE_REGISTER_USER_DATA = 4;
+    public static final int ROUTE_LIST_USER_DATA = 5;
 
-    public static final int ROUTE_REGISTER_USER_FILE = 5;
-    public static final int ROUTE_LIST_USER_FILE = 6;
+    public static final int ROUTE_REGISTER_USER_FILE = 6;
+    public static final int ROUTE_LIST_USER_FILE = 7;
 }
