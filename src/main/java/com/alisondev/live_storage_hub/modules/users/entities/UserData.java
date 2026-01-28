@@ -31,6 +31,9 @@ public class UserData {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
+  @Column(name = "data_type", nullable = false)
+  private String dataType; // profile, settings, progress, etc
+
   @Type(JsonBinaryType.class)
   @Column(name = "json_data", columnDefinition = "jsonb", nullable = false)
   private Map<String, Object> jsonData;
