@@ -1,0 +1,2 @@
+ALTER TABLE users_data
+ADD COLUMN data_type VARCHAR(50) NOT NULL;

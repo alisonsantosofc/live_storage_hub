@@ -6,13 +6,41 @@ services:
     container_name: live_storage_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: live_storage_hub
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - live_storage_net
+
+  api:
+    build: .
+    container_name: live_storage_api
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "9090:9090"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      ADMIN_SUPER_SECRET_KEY: ${ADMIN_SUPER_SECRET_KEY}
+    networks:
+      - live_storage_net
+
+networks:
+  live_storage_net:
+    driver: bridge
 
 volumes:
   postgres_data:

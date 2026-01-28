@@ -1,14 +1,14 @@
 server:
-  port: 9090
+  port: ${SERVER_PORT:9090}
 
 spring:
   profiles:
     active: local
     
   datasource:
-    url: jdbc:postgresql://localhost:5432/live_storage_hub
-    username: postgres
-    password: postgres
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
     driver-class-name: org.postgresql.Driver
 
   jpa:
