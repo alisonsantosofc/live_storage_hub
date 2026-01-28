@@ -7,11 +7,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.alisondev.live_storage_hub.modules.apps.entities.App;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
-    @UniqueConstraint(columnNames = { "app_id", "email" })
+    @UniqueConstraint(columnNames = { "app_id" })
 })
 @Data
 @NoArgsConstructor
@@ -29,14 +31,15 @@ public class User {
   @JoinColumn(name = "app_id", nullable = false)
   private App app;
 
-  @Column(nullable = false, unique = true)
+  @Column(nullable = false)
   private String email;
 
   @Column(nullable = false)
   private String password;
 
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt = LocalDateTime.now();
+  @CreationTimestamp
+  @Column(name = "created_at", updatable = false)
+  private LocalDateTime createdAt;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<VerificationCode> verificationCodes = new ArrayList<>();

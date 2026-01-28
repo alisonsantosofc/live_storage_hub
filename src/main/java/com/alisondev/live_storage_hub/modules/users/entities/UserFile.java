@@ -4,6 +4,8 @@ import com.alisondev.live_storage_hub.modules.apps.entities.App;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.*;
+
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
@@ -38,6 +40,7 @@ public class UserFile {
   @Column(columnDefinition = "jsonb")
   private Map<String, Object> metadata;
 
-  @Column(name = "created_at", nullable = false)
-  private LocalDateTime createdAt = LocalDateTime.now();
+  @CreationTimestamp
+  @Column(name = "created_at", updatable = false)
+  private LocalDateTime createdAt;
 }
