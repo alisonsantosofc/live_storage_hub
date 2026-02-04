@@ -5,7 +5,7 @@ import com.alisondev.live_storage_hub.modules.apps.entities.App;
 import com.alisondev.live_storage_hub.modules.users.entities.User;
 import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
 import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
-import com.alisondev.live_storage_hub.modules.users.dtos.AuthResponseDTO;
+import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserDTO;
 import com.alisondev.live_storage_hub.modules.users.dtos.UserResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.errors.UsersErrorPrefix;
@@ -34,7 +34,7 @@ public class LoginUserService {
     this.jwtUtil = jwtUtil;
   }
 
-  public AuthResponseDTO execute(String apiKey, LoginUserDTO request) {
+  public LoginUserResponseDTO execute(String apiKey, LoginUserDTO request) {
     App app = appRepository.findByApiKey(apiKey)
         .orElseThrow(() -> new ApiRuntimeException(prefix + 1, "App not found or invalid api key."));
 
@@ -47,7 +47,7 @@ public class LoginUserService {
 
     String token = jwtUtil.generateToken(user.getEmail(), app.getId());
 
-    AuthResponseDTO response = new AuthResponseDTO();
+    LoginUserResponseDTO response = new LoginUserResponseDTO();
     response.setToken(token);
 
     UserResponseDTO userResponse = new UserResponseDTO();

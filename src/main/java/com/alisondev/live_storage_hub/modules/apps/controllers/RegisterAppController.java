@@ -22,7 +22,7 @@ public class RegisterAppController {
     this.registerAppService = registerAppService;
   }
 
-  @PostMapping("/register")
+  @PostMapping
   @Operation(summary = "Register app", description = "Registers new apps.")
   public SendApiResponse<RegisterAppResponseDTO> handle(
       @RequestHeader("X-Admin-Key") String adminKey,

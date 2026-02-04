@@ -1,7 +1,7 @@
 package com.alisondev.live_storage_hub.modules.users.controllers;
 
 import com.alisondev.live_storage_hub.dtos.SendApiResponse;
-import com.alisondev.live_storage_hub.modules.users.dtos.AuthResponseDTO;
+import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserDTO;
 import com.alisondev.live_storage_hub.modules.users.services.LoginUserService;
 
@@ -15,8 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users")
-@Tag(name = "Users", description = "Endpoints for users.")
+@RequestMapping("/auth")
+@Tag(name = "Authentication", description = "Endpoints for authenticate users.")
 public class LoginUserController {
   private final LoginUserService loginUserService;
 
@@ -24,13 +24,29 @@ public class LoginUserController {
     this.loginUserService = loginUserService;
   }
 
-  @Operation(summary = "Login user", description = "Authenticate user and return token.")
+  @Operation(summary = "Login user", description = "Authenticate user and return JWT token.")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Successful login", content = @Content(schema = @Schema(implementation = AuthResponseDTO.class))),
+    @ApiResponse(
+      responseCode = "200",
+      description = "Successful login",
+      content = @Content(schema = @Schema(implementation = LoginUserResponseDTO.class))
+    ),
+    @ApiResponse(
+      responseCode = "401",
+      description = "Invalid credentials"
+    ),
+    @ApiResponse(
+      responseCode = "403",
+      description = "Invalid API key"
+    )
   })
   @PostMapping("/login")
-  public SendApiResponse<AuthResponseDTO> handle(@RequestHeader("X-Api-Key") String apiKey,
-      @RequestBody LoginUserDTO request) {
-    return SendApiResponse.ok(loginUserService.execute(apiKey, request));
+  public SendApiResponse<LoginUserResponseDTO> handle(
+    @RequestHeader("X-Api-Key") String apiKey,
+    @RequestBody LoginUserDTO request
+  ) {
+    return SendApiResponse.ok(
+      loginUserService.execute(apiKey, request)
+    );
   }
 }

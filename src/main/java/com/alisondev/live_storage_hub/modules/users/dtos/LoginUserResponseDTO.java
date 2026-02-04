@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-public class AuthResponseDTO {
+public class LoginUserResponseDTO {
   @Schema(description = "API token associated with the user.", example = "abc123xyz456...")
   private String token;
 

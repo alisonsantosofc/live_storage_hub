@@ -1,7 +1,7 @@
 package com.alisondev.live_storage_hub.controller;
 
 // import com.alisondev.live_storage_hub.modules.users.controllers.AuthController;
-// import com.alisondev.live_storage_hub.modules.users.dtos.AuthResponseDTO;
+// import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserResponseDTO;
 // import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserDTO;
 // import com.alisondev.live_storage_hub.modules.users.services.AuthService;
 
@@ -35,7 +35,7 @@ class AuthControllerTest {
   //   loginUserDTO.setEmail("user@test.com");
   //   loginUserDTO.setPassword("123456");
 
-  //   AuthResponseDTO response = new AuthResponseDTO();
+  //   LoginUserResponseDTO response = new LoginUserResponseDTO();
   //   response.setToken("fake-jwt-token");
 
   //   Mockito.when(authService.login(Mockito.eq("apikey123"), Mockito.any(LoginUserDTO.class)))

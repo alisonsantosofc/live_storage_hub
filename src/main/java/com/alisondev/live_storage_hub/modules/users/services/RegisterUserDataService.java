@@ -40,6 +40,7 @@ public class RegisterUserDataService {
     UserData userData = UserData.builder()
         .app(app)
         .user(user)
+        .dataType(request.getDataType())
         .jsonData(request.getJsonData())
         .build();
 

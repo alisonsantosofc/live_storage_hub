@@ -7,6 +7,8 @@ import lombok.Data;
 
 @Data
 public class RegisterUserDataDTO {
+  @Schema(description = "Data type for register.", example = "profile")
+  private String dataType;
   @Schema(description = "Json data for register.", example = "JSON.stringfy()")
   private Map<String, Object> jsonData;
 }
