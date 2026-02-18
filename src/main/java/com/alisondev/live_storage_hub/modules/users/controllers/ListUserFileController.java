@@ -1,42 +1,51 @@
 package com.alisondev.live_storage_hub.modules.users.controllers;
 
-import com.alisondev.live_storage_hub.modules.users.entities.UserFile;
-import com.alisondev.live_storage_hub.modules.users.dtos.UserFileResponseDTO;
-import com.alisondev.live_storage_hub.modules.users.services.ListUserFileService;
 import com.alisondev.live_storage_hub.dtos.SendApiResponse;
+import com.alisondev.live_storage_hub.modules.users.dtos.UserFileResponseDTO;
+import com.alisondev.live_storage_hub.modules.users.entities.UserFile;
+import com.alisondev.live_storage_hub.modules.users.services.ListUserFileService;
 import com.alisondev.live_storage_hub.security.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/user_file")
-@Tag(name = "User File", description = "Endpoints for user files.")
+@RequestMapping("/users/{userId}/files")
+@Tag(name = "User Files", description = "Endpoints for user files.")
 public class ListUserFileController {
   private final ListUserFileService listUserFileService;
   private final JwtUtil jwtUtil;
 
-  @Autowired
-  public ListUserFileController(ListUserFileService listUserFileService, JwtUtil jwtUtil) {
+  public ListUserFileController(                            
+    ListUserFileService listUserFileService,
+    JwtUtil jwtUtil
+  ) {
     this.listUserFileService = listUserFileService;
     this.jwtUtil = jwtUtil;
   }
 
-  @Operation(summary = "List user file", description = "Lists all registered user file.")
-  @GetMapping("/list")
-  public SendApiResponse<List<UserFileResponseDTO>> handle(@RequestHeader("Authorization") String authHeader,
-      @RequestParam Long userId) {
-    String token = authHeader.substring(7);
+  @Operation(
+    summary = "List user files",
+    description = "Lists all files registered for a user."
+  )
+  @GetMapping
+  public SendApiResponse<List<UserFileResponseDTO>> handle(
+    @RequestHeader("Authorization") String authHeader,
+    @PathVariable Long userId
+  ) {
+    String token = authHeader.replace("Bearer ", "");
     Long appId = jwtUtil.getAppIdFromToken(token);
 
-    List<UserFileResponseDTO> list = listUserFileService.execute(appId, userId)
-        .stream().map(this::toDto).collect(Collectors.toList());
+    List<UserFileResponseDTO> list = listUserFileService
+      .execute(appId, userId)
+      .stream()
+      .map(this::toDto)
+      .collect(Collectors.toList());
 
     return SendApiResponse.ok(list);
   }

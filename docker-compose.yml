@@ -1,5 +1,3 @@
-version: "3.8"
-
 networks:
   live_storage_hub_net:
     driver: bridge

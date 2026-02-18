@@ -40,7 +40,7 @@ public class LoginUserController {
       description = "Invalid API key"
     )
   })
-  @PostMapping("/login")
+  @PostMapping
   public SendApiResponse<LoginUserResponseDTO> handle(
     @RequestHeader("X-Api-Key") String apiKey,
     @RequestBody LoginUserDTO request

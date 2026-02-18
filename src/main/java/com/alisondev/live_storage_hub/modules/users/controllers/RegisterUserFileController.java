@@ -1,43 +1,56 @@
 package com.alisondev.live_storage_hub.modules.users.controllers;
 
-import com.alisondev.live_storage_hub.modules.users.entities.UserFile;
-import com.alisondev.live_storage_hub.modules.users.dtos.UserFileResponseDTO;
-import com.alisondev.live_storage_hub.modules.users.services.RegisterUserFileService;
 import com.alisondev.live_storage_hub.dtos.SendApiResponse;
+import com.alisondev.live_storage_hub.modules.users.dtos.UserFileResponseDTO;
+import com.alisondev.live_storage_hub.modules.users.entities.UserFile;
+import com.alisondev.live_storage_hub.modules.users.services.RegisterUserFileService;
 import com.alisondev.live_storage_hub.security.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/user_file")
-@Tag(name = "User File", description = "Endpoints for user files.")
+@RequestMapping("/users/{userId}/files")
+@Tag(name = "User Files", description = "Endpoints for user files.")
 public class RegisterUserFileController {
   private final RegisterUserFileService registerUserFileService;
   private final JwtUtil jwtUtil;
 
-  @Autowired
-  public RegisterUserFileController(RegisterUserFileService registerUserFileService, JwtUtil jwtUtil) {
+  public RegisterUserFileController(
+    RegisterUserFileService registerUserFileService,
+    JwtUtil jwtUtil
+  ) {
     this.registerUserFileService = registerUserFileService;
     this.jwtUtil = jwtUtil;
   }
 
-  @Operation(summary = "Upload user file", description = "Registers and upload new user file.")
-  @PostMapping("/upload")
-  public SendApiResponse<UserFileResponseDTO> handle(@RequestHeader("Authorization") String authHeader,
-      @RequestParam("userId") Long userId,
-      @RequestParam("file") MultipartFile file,
-      @RequestParam("fileType") String fileType) throws IOException {
-    String token = authHeader.substring(7);
+  @Operation(
+    summary = "Upload user file",
+    description = "Uploads and registers a new file for a user."
+  )
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public SendApiResponse<UserFileResponseDTO> handle(
+    @RequestHeader("Authorization") String authHeader,
+    @PathVariable Long userId,
+    @RequestPart("file") MultipartFile file,
+    @RequestParam("fileType") String fileType
+  ) throws IOException {
+    String token = authHeader.replace("Bearer ", "");
     Long appId = jwtUtil.getAppIdFromToken(token);
 
-    UserFile data = registerUserFileService.execute(appId, userId, file, fileType);
+    UserFile data = registerUserFileService.execute(
+      appId,
+      userId,
+      file,
+      fileType
+    );
+
     return SendApiResponse.ok(toDto(data));
   }
 

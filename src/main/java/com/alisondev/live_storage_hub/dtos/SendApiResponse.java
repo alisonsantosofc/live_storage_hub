@@ -10,12 +10,12 @@ public class SendApiResponse<T> {
   private String message;
   private T data;
 
-  public static <T> SendApiResponse<T> ok(T data) {
-    return new SendApiResponse<>( "0", "Success", data);
-  }
-
   public static <T> SendApiResponse<T> ok() {
     return new SendApiResponse<>( "0", "Success", null);
+  }
+
+  public static <T> SendApiResponse<T> ok(T data) {
+    return new SendApiResponse<>( "0", "Success", data);
   }
 
   public static <T> SendApiResponse<T> ok(String message, T data) {
