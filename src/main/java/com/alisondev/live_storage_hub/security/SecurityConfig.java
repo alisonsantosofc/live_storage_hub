@@ -15,36 +15,43 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+  private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-  public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+  public SecurityConfig(
+    JwtAuthenticationFilter jwtAuthenticationFilter,
+    CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
+    CustomAccessDeniedHandler customAccessDeniedHandler
+  ) {
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
+    this.customAccessDeniedHandler = customAccessDeniedHandler;
   }
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
-      // 🔐 Disable CSRF (API stateless)
       .csrf(csrf -> csrf.disable())
 
-      // 🚫 API none use session
-      .sessionManagement(session -> 
-        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-      )
+      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-      // 🔑 Authentication rules
+      .exceptionHandling(ex -> ex
+        .authenticationEntryPoint(customAuthenticationEntryPoint)
+        .accessDeniedHandler(customAccessDeniedHandler))
+
       .authorizeHttpRequests(auth -> auth
         .requestMatchers(
-          "/auth/**",
-          "/swagger-ui/**",
-          "/v3/api-docs/**"
-        ).permitAll()
+            "/auth/**",
+            "/error",
+            "/swagger-ui/**",
+            "/v3/api-docs/**")
+        .permitAll()
 
-        .requestMatchers(HttpMethod.POST, "/apps").permitAll()
+        .requestMatchers("/apps/**").permitAll()
+        .requestMatchers(HttpMethod.POST, "/users").permitAll()
 
-        .anyRequest().authenticated()
-      )
+        .anyRequest().authenticated())
 
-      // 🔎 JWT filter
       .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
@@ -52,8 +59,9 @@ public class SecurityConfig {
 
   @Bean
   public AuthenticationManager authenticationManager(
-    AuthenticationConfiguration authConfig) throws Exception {
-      return authConfig.getAuthenticationManager();
+    AuthenticationConfiguration authConfig
+  ) throws Exception {
+    return authConfig.getAuthenticationManager();
   }
 
   @Bean

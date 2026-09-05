@@ -20,10 +20,10 @@ public class JwtUtil {
     this.jwtExpirationMs = jwtExpirationMs;
   }
 
-  public String generateToken(String email, Long appId) {
+  public String generateToken(Long userId, String email, Long appId) {
     return Jwts.builder()
-        .setSubject(email)
-        .addClaims(Map.of("appId", appId))
+        .setSubject(userId.toString())
+        .addClaims(Map.of("userId", userId, "appId", appId, "email", email))
         .setIssuedAt(new Date())
         .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
         .signWith(key, SignatureAlgorithm.HS256)
@@ -31,7 +31,12 @@ public class JwtUtil {
   }
 
   public String getEmailFromToken(String token) {
-    return parseClaims(token).getSubject();
+    return parseClaims(token).get("email", String.class);
+  }
+
+  public Long getUserIdFromToken(String token) {
+    Object userId = parseClaims(token).get("userId");
+    return userId != null ? Long.valueOf(userId.toString()) : null;
   }
 
   public Long getAppIdFromToken(String token) {

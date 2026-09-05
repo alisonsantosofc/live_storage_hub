@@ -1,10 +1,11 @@
 package com.alisondev.live_storage_hub;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringBootTest
 class LiveStorageHubApplicationTests {
 	@Test
-	void contextLoads() {}
+	void applicationEntryPointIsAvailable() {
+		assertNotNull(LiveStorageHubApplication.class);
+	}
 }

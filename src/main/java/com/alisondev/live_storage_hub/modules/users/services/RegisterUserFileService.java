@@ -23,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.InvalidPathException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -46,6 +48,9 @@ public class RegisterUserFileService {
   }
 
   public UserFile execute(Long appId, Long userId, MultipartFile file, String fileType) throws IOException {
+    if (file.isEmpty())
+      throw new ApiRuntimeException(prefix + 6, "File cannot be empty.");
+
     App app = appRepository.findById(appId)
         .orElseThrow(() -> new ApiRuntimeException(prefix + 1, "App not found or invalid api key."));
     User user = userRepository.findById(userId)
@@ -54,19 +59,23 @@ public class RegisterUserFileService {
     if (!user.getApp().getId().equals(appId))
       throw new ApiRuntimeException(prefix + 3, "User does not registered to this app.");
 
-    String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+    String fileName = UUID.randomUUID().toString();
+    String storageKey = "apps/" + appId + "/users/" + userId + "/" + fileName;
     String fileUrl;
 
     if ("local".equalsIgnoreCase(storageConfig.getStorageMode())) {
-      Path uploadPath = Paths.get(storageConfig.getLocalPath());
+      Path uploadPath = Paths.get(storageConfig.getLocalPath()).toAbsolutePath().normalize();
 
       if (!Files.exists(uploadPath))
         Files.createDirectories(uploadPath);
 
-      Path destination = uploadPath.resolve(fileName);
+      Path destination = uploadPath.resolve(storageKey).normalize();
+      if (!destination.startsWith(uploadPath))
+        throw new InvalidPathException(storageKey, "Invalid storage path");
+      Files.createDirectories(destination.getParent());
 
       Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-      fileUrl = destination.toAbsolutePath().toString();
+      fileUrl = storageKey;
     } else if ("s3".equalsIgnoreCase(storageConfig.getStorageMode())) {
       if (s3Client == null)
         throw new ApiRuntimeException(prefix + 4, "S3 is not configured.");
@@ -74,21 +83,26 @@ public class RegisterUserFileService {
       s3Client.putObject(
           PutObjectRequest.builder()
               .bucket(storageConfig.getBucketName())
-              .key(fileName)
+              .key(storageKey)
               .build(),
           software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
 
-      fileUrl = "https://" + storageConfig.getBucketName() + ".s3.amazonaws.com/" + fileName;
+      fileUrl = storageKey;
     } else {
       throw new ApiRuntimeException(prefix + 5, "Invalid storage config.");
     } 
+
+    Map<String, Object> metadata = new HashMap<>();
+    metadata.put("size", file.getSize());
+    metadata.put("name", file.getOriginalFilename() == null ? "file" : file.getOriginalFilename());
+    metadata.put("contentType", file.getContentType() == null ? "application/octet-stream" : file.getContentType());
 
     UserFile userFile = UserFile.builder()
         .app(app)
         .user(user)
         .fileType(fileType)
         .fileUrl(fileUrl)
-        .metadata(Map.of("size", file.getSize(), "name", file.getOriginalFilename()))
+        .metadata(metadata)
         .build();
 
     return userFileRepository.save(userFile);

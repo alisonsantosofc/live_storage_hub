@@ -12,4 +12,5 @@ public class UsersErrorPrefix {
 
     public static final int ROUTE_REGISTER_USER_FILE = 6;
     public static final int ROUTE_LIST_USER_FILE = 7;
+    public static final int ROUTE_USER_FILE_CONTENT = 8;
 }

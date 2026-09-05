@@ -1,103 +1,66 @@
-// package com.alisondev.live_storage_hub.controller;
+package com.alisondev.live_storage_hub.controller;
 
-// import com.alisondev.live_storage_hub.modules.apps.entities.App;
-// import com.alisondev.live_storage_hub.modules.users.entities.User;
-// import com.alisondev.live_storage_hub.modules.users.entities.UserData;
-// import com.alisondev.live_storage_hub.modules.users.controllers.UserDataController;
-// import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDataDTO;
-// import com.alisondev.live_storage_hub.modules.users.services.UserDataService;
-// import com.alisondev.live_storage_hub.security.JwtUtil;
+import com.alisondev.live_storage_hub.exceptions.ApiRuntimeException;
+import com.alisondev.live_storage_hub.modules.apps.entities.App;
+import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
+import com.alisondev.live_storage_hub.modules.users.entities.User;
+import com.alisondev.live_storage_hub.modules.users.entities.UserData;
+import com.alisondev.live_storage_hub.modules.users.repositories.UserDataRepository;
+import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
+import com.alisondev.live_storage_hub.modules.users.services.ListUserDataService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-// import com.fasterxml.jackson.databind.ObjectMapper;
-// import org.junit.jupiter.api.Test;
-// import org.mockito.Mockito;
+import java.util.List;
+import java.util.Optional;
 
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-// import org.springframework.boot.test.mock.mockito.MockBean;
-// import org.springframework.http.MediaType;
-// import org.springframework.test.web.servlet.MockMvc;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
-// import java.time.LocalDateTime;
-// import java.util.List;
-// import java.util.Map;
+@ExtendWith(MockitoExtension.class)
+class UserDataControllerTest {
+  @Mock private AppRepository appRepository;
+  @Mock private UserRepository userRepository;
+  @Mock private UserDataRepository userDataRepository;
 
-// import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-// import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-// import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+  private ListUserDataService service;
 
-// @WebMvcTest(UserDataController.class)
-// class UserDataControllerTest {
+  @BeforeEach
+  void setUp() {
+    service = new ListUserDataService(appRepository, userRepository, userDataRepository);
+  }
 
-//   @Autowired
-//   private MockMvc mockMvc;
+  @Test
+  void listsOnlyDataOwnedByAuthenticatedAppAndUser() {
+    App app = App.builder().id(1L).build();
+    User user = User.builder().id(2L).app(app).build();
+    List<UserData> expected = List.of(UserData.builder().id(3L).app(app).user(user).build());
+    when(appRepository.findById(1L)).thenReturn(Optional.of(app));
+    when(userRepository.findById(2L)).thenReturn(Optional.of(user));
+    when(userDataRepository.findByAppAndUser(app, user)).thenReturn(expected);
 
-//   @MockBean
-//   private UserDataService userDataService;
+    assertEquals(expected, service.execute(1L, 2L));
+    verify(userDataRepository).findByAppAndUser(app, user);
+  }
 
-//   @MockBean
-//   private JwtUtil jwtUtil;
+  @Test
+  void rejectsUserFromAnotherApp() {
+    App requestedApp = App.builder().id(1L).build();
+    App userApp = App.builder().id(9L).build();
+    User user = User.builder().id(2L).app(userApp).build();
+    when(appRepository.findById(1L)).thenReturn(Optional.of(requestedApp));
+    when(userRepository.findById(2L)).thenReturn(Optional.of(user));
 
-//   @Autowired
-//   private ObjectMapper objectMapper;
+    ApiRuntimeException error = assertThrows(ApiRuntimeException.class,
+        () -> service.execute(1L, 2L));
 
-//   @Test
-//   void createUserData_shouldReturnOk() throws Exception {
-//     Long appId = 1L;
-//     Long userId = 10L;
-//     Map<String, Object> json = Map.of("level", "easy");
-
-//     RegisterUserDataDTO request = new RegisterUserDataDTO();
-//     request.setJsonData(json);
-
-//     App app = App.builder().id(appId).name("TestApp").apiKey("abc").createdAt(LocalDateTime.now()).build();
-//     User user = User.builder().id(userId).name("Test User").email("test@example.com").app(app)
-//         .createdAt(LocalDateTime.now()).build();
-
-//     UserData userData = UserData.builder()
-//         .id(99L)
-//         .app(app)
-//         .user(user)
-//         .jsonData(json)
-//         .createdAt(LocalDateTime.now())
-//         .build();
-
-//     Mockito.when(jwtUtil.getAppIdFromToken("mock-token")).thenReturn(appId);
-//     Mockito.when(userDataService.saveData(Mockito.eq(appId), Mockito.eq(userId), Mockito.any(RegisterUserDataDTO.class)))
-//         .thenReturn(userData);
-
-//     mockMvc.perform(post("/userdata")
-//         .header("Authorization", "Bearer mock-token")
-//         .param("userId", userId.toString())
-//         .contentType(MediaType.APPLICATION_JSON)
-//         .content(objectMapper.writeValueAsString(json)))
-//         .andExpect(status().isOk());
-//   }
-
-//   @Test
-//   void listUserData_shouldReturnOk() throws Exception {
-//     Long appId = 1L;
-//     Long userId = 10L;
-
-//     App app = App.builder().id(appId).name("TestApp").apiKey("abc").createdAt(LocalDateTime.now()).build();
-//     User user = User.builder().id(userId).name("Test User").email("test@example.com").app(app)
-//         .createdAt(LocalDateTime.now()).build();
-
-//     UserData userData = UserData.builder()
-//         .id(1L)
-//         .app(app)
-//         .user(user)
-//         .jsonData(Map.of("score", 99))
-//         .createdAt(LocalDateTime.now())
-//         .build();
-
-//     Mockito.when(jwtUtil.getAppIdFromToken("mock-token")).thenReturn(appId);
-//     Mockito.when(userDataService.listData(appId, userId))
-//         .thenReturn(List.of(userData));
-
-//     mockMvc.perform(get("/userdata")
-//         .header("Authorization", "Bearer mock-token")
-//         .param("userId", userId.toString()))
-//         .andExpect(status().isOk());
-//   }
-// }
+    assertEquals("1.5.3", error.getCode());
+    verifyNoInteractions(userDataRepository);
+  }
+}

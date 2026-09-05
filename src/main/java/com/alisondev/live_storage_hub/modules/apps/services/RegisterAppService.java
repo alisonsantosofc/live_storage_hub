@@ -25,7 +25,7 @@ public class RegisterAppService {
 
   public App execute(String adminKey, String appName) {
     if (!adminApiKey.equals(adminKey)) {
-      throw new ApiRuntimeException(prefix + 1, "Access denied, invalid admin key.");
+      throw new ApiRuntimeException(prefix + 1, "Invalid admin key.");
     }
 
     App app = App.builder()

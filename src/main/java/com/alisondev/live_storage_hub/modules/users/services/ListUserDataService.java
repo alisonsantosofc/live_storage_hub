@@ -18,7 +18,7 @@ public class ListUserDataService {
   private final AppRepository appRepository;
   private final UserRepository userRepository;
   private final UserDataRepository userDataRepository;
-  private final String prefix = UsersErrorPrefix.MODULE + "." + UsersErrorPrefix.ROUTE_REGISTER_USER_DATA + ".";
+  private final String prefix = UsersErrorPrefix.MODULE + "." + UsersErrorPrefix.ROUTE_LIST_USER_DATA + ".";
 
   public ListUserDataService(AppRepository appRepository, UserRepository userRepository,
       UserDataRepository userDataRepository) {
@@ -31,10 +31,10 @@ public class ListUserDataService {
     App app = appRepository.findById(appId)
         .orElseThrow(() -> new ApiRuntimeException(prefix + 1, "App not found or invalid api key."));
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new ApiRuntimeException(prefix + 1, "User not found or invalid user id."));
+        .orElseThrow(() -> new ApiRuntimeException(prefix + 2, "User not found or invalid user id."));
 
     if (!user.getApp().getId().equals(appId)) {
-      throw new ApiRuntimeException(prefix + 1, "User does not registered to this app.");
+      throw new ApiRuntimeException(prefix + 3, "User does not registered to this app.");
     }
 
     return userDataRepository.findByAppAndUser(app, user);

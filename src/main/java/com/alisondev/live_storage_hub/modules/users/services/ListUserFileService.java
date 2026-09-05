@@ -18,7 +18,7 @@ public class ListUserFileService {
   private final AppRepository appRepository;
   private final UserRepository userRepository;
   private final UserFileRepository userFileRepository;
-  private final String prefix = UsersErrorPrefix.MODULE + "." + UsersErrorPrefix.ROUTE_REGISTER_USER_DATA + ".";
+  private final String prefix = UsersErrorPrefix.MODULE + "." + UsersErrorPrefix.ROUTE_LIST_USER_FILE + ".";
 
   public ListUserFileService(AppRepository appRepository, UserRepository userRepository,
       UserFileRepository userFileRepository) {

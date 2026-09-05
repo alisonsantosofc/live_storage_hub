@@ -28,7 +28,7 @@ public class RegisterUserService {
 
   public User execute(String apiKey, RegisterUserDTO request) {
     App app = appRepository.findByApiKey(apiKey)
-        .orElseThrow(() -> new ApiRuntimeException(prefix + 1, "App not found or invalid api key."));
+        .orElseThrow(() -> new ApiRuntimeException(prefix + 1, "Invalid API key."));
 
     if (userRepository.findByAppAndEmail(app, request.getEmail()).isPresent()) {
       throw new ApiRuntimeException(prefix + 2, "User already registered for this app.");

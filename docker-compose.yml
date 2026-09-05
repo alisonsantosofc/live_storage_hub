@@ -34,8 +34,11 @@ services:
       SERVER_PORT: 9090
     ports:
       - "9090:9090"
+    volumes:
+      - file_storage:/app/storage
     networks:
       - live_storage_hub_net
 
 volumes:
   postgres_data:
+  file_storage:

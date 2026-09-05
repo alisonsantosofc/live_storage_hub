@@ -30,7 +30,7 @@ public class ListAppsService {
 
   private void validateAdminKey(String adminKey) {
     if (!adminApiKey.equals(adminKey)) {
-      throw new ApiRuntimeException(prefix + 1, "Access denied, invalid admin key.");
+      throw new ApiRuntimeException(prefix + 1, "Invalid admin key.");
     }
   }
 }

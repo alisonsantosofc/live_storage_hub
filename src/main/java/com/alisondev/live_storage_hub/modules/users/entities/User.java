@@ -13,7 +13,7 @@ import com.alisondev.live_storage_hub.modules.apps.entities.App;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
-    @UniqueConstraint(columnNames = { "app_id" })
+    @UniqueConstraint(columnNames = { "app_id", "email" })
 })
 @Data
 @NoArgsConstructor
@@ -42,5 +42,6 @@ public class User {
   private LocalDateTime createdAt;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
   private List<VerificationCode> verificationCodes = new ArrayList<>();
 }

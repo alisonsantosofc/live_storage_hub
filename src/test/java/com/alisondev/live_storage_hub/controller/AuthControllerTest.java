@@ -1,50 +1,32 @@
 package com.alisondev.live_storage_hub.controller;
 
-// import com.alisondev.live_storage_hub.modules.users.controllers.AuthController;
-// import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserResponseDTO;
-// import com.alisondev.live_storage_hub.modules.users.dtos.LoginUserDTO;
-// import com.alisondev.live_storage_hub.modules.users.services.AuthService;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alisondev.live_storage_hub.security.JwtUtil;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-// @WebMvcTest(AuthController.class)
 class AuthControllerTest {
-  // @Autowired
-  // private MockMvc mockMvc;
+  private static final String SECRET = "test-secret-with-at-least-32-characters";
 
-  // @MockBean
-  // private AuthService authService;
+  @Test
+  void generatedTokenContainsUserAndAppIdentity() {
+    JwtUtil jwtUtil = new JwtUtil(SECRET, 60_000);
+    String token = jwtUtil.generateToken(10L, "user@example.com", 20L);
 
-  // @Autowired
-  // private ObjectMapper objectMapper;
+    assertTrue(jwtUtil.validateToken(token));
+    assertEquals(10L, jwtUtil.getUserIdFromToken(token));
+    assertEquals(20L, jwtUtil.getAppIdFromToken(token));
+    assertEquals("user@example.com", jwtUtil.getEmailFromToken(token));
+  }
 
-  // @Test
-  // void login_shouldReturnOk() throws Exception {
-  //   LoginUserDTO loginUserDTO = new LoginUserDTO();
-  //   loginUserDTO.setEmail("user@test.com");
-  //   loginUserDTO.setPassword("123456");
+  @Test
+  void tokenSignedWithAnotherKeyIsRejected() {
+    JwtUtil issuer = new JwtUtil(SECRET, 60_000);
+    JwtUtil verifier = new JwtUtil("another-test-secret-with-32-characters", 60_000);
+    String token = issuer.generateToken(10L, "user@example.com", 20L);
 
-  //   LoginUserResponseDTO response = new LoginUserResponseDTO();
-  //   response.setToken("fake-jwt-token");
-
-  //   Mockito.when(authService.login(Mockito.eq("apikey123"), Mockito.any(LoginUserDTO.class)))
-  //       .thenReturn(response);
-
-  //   mockMvc.perform(post("/auth/login")
-  //       .header("X-API-KEY", "apikey123")
-  //       .contentType(MediaType.APPLICATION_JSON)
-  //       .content(objectMapper.writeValueAsString(loginUserDTO)))
-  //       .andExpect(status().isOk());
-  // }
+    assertFalse(verifier.validateToken(token));
+  }
 }

@@ -7,4 +7,6 @@ import lombok.Data;
 public class RegisterAppResponseDTO {
   @Schema(description = "Unique app identifier code.", example = "123...")
   private Long id;
+  @Schema(description = "Unique app api key.", example = "hs113hbj...")
+  private String apiKey;
 }

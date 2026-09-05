@@ -1,99 +1,116 @@
-// package com.alisondev.live_storage_hub.controller;
+package com.alisondev.live_storage_hub.controller;
 
-// import com.alisondev.live_storage_hub.modules.apps.entities.App;
-// import com.alisondev.live_storage_hub.modules.users.entities.User;
-// import com.alisondev.live_storage_hub.modules.users.entities.UserFile;
-// import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
-// import com.alisondev.live_storage_hub.modules.users.repositories.UserFileRepository;
-// import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
-// import com.alisondev.live_storage_hub.modules.users.controllers.UserFileController;
-// import com.alisondev.live_storage_hub.config.StorageConfig;
-// import com.alisondev.live_storage_hub.security.JwtUtil;
+import com.alisondev.live_storage_hub.config.StorageConfig;
+import com.alisondev.live_storage_hub.modules.apps.entities.App;
+import com.alisondev.live_storage_hub.modules.apps.repositories.AppRepository;
+import com.alisondev.live_storage_hub.modules.users.entities.User;
+import com.alisondev.live_storage_hub.modules.users.entities.UserFile;
+import com.alisondev.live_storage_hub.modules.users.repositories.UserFileRepository;
+import com.alisondev.live_storage_hub.modules.users.repositories.UserRepository;
+import com.alisondev.live_storage_hub.modules.users.services.RegisterUserFileService;
+import com.alisondev.live_storage_hub.modules.users.services.UserFileStorageService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
-// import org.junit.jupiter.api.Test;
-// import org.mockito.Mockito;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
 
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-// import org.springframework.boot.test.mock.mockito.MockBean;
-// import org.springframework.mock.web.MockMultipartFile;
-// import org.springframework.test.web.servlet.MockMvc;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-// import java.nio.file.Files;
-// import java.nio.file.Path;
-// import java.util.List;
-// import java.util.Map;
+@ExtendWith(MockitoExtension.class)
+class UserFileControllerTest {
+  @Mock private AppRepository appRepository;
+  @Mock private UserRepository userRepository;
+  @Mock private UserFileRepository userFileRepository;
+  @Mock private StorageConfig storageConfig;
+  @TempDir Path storageRoot;
 
-// import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-// import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-// import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+  private App app;
+  private User user;
 
-// @WebMvcTest(UserFileController.class)
-// class UserFileControllerTest {
+  @BeforeEach
+  void setUp() {
+    app = App.builder().id(1L).build();
+    user = User.builder().id(2L).app(app).build();
+    when(storageConfig.getStorageMode()).thenReturn("local");
+    when(storageConfig.getLocalPath()).thenReturn(storageRoot.toString());
+  }
 
-//   @Autowired
-//   private MockMvc mockMvc;
+  @Test
+  void uploadStoresOpaqueKeyAndSafeMetadata() throws Exception {
+    when(appRepository.findById(1L)).thenReturn(Optional.of(app));
+    when(userRepository.findById(2L)).thenReturn(Optional.of(user));
+    when(userFileRepository.save(any(UserFile.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    RegisterUserFileService service = new RegisterUserFileService(
+        appRepository, userRepository, userFileRepository, storageConfig, null);
+    MockMultipartFile upload = new MockMultipartFile(
+        "file", "../../unsafe.txt", "text/plain", "content".getBytes());
 
-//   @MockBean
-//   private AppRepository appRepository;
+    UserFile saved = service.execute(1L, 2L, upload, "document");
 
-//   @MockBean
-//   private UserRepository userRepository;
+    assertTrue(saved.getFileUrl().matches("apps/1/users/2/[0-9a-f-]{36}"));
+    assertEquals("../../unsafe.txt", saved.getMetadata().get("name"));
+    assertEquals("text/plain", saved.getMetadata().get("contentType"));
+    assertTrue(Files.isRegularFile(storageRoot.resolve(saved.getFileUrl())));
+  }
 
-//   @MockBean
-//   private UserFileRepository userFileRepository;
+  @Test
+  void downloadReturnsStoredBytesAndMetadata() throws Exception {
+    Path storedPath = storageRoot.resolve("apps/1/users/2/file-id");
+    Files.createDirectories(storedPath.getParent());
+    Files.write(storedPath, "content".getBytes());
+    UserFile file = ownedFile("apps/1/users/2/file-id");
+    when(appRepository.findById(1L)).thenReturn(Optional.of(app));
+    when(userRepository.findById(2L)).thenReturn(Optional.of(user));
+    when(userFileRepository.findByAppAndUserAndId(app, user, 3L)).thenReturn(Optional.of(file));
+    UserFileStorageService service = new UserFileStorageService(
+        appRepository, userRepository, userFileRepository, storageConfig, null);
 
-//   @MockBean
-//   private JwtUtil jwtUtil;
+    UserFileStorageService.StoredFile result = service.download(1L, 2L, 3L);
 
-//   @MockBean
-//   private StorageConfig storageConfig;
+    assertArrayEquals("content".getBytes(), result.content());
+    assertEquals("report.txt", result.originalName());
+    assertEquals("text/plain", result.contentType());
+  }
 
-//   @Test
-//   void uploadFile_shouldReturnOk() throws Exception {
-//     MockMultipartFile file = new MockMultipartFile("file", "test.txt",
-//         "text/plain", "Hello".getBytes());
+  @Test
+  void deleteRemovesContentBeforeDatabaseRecord() throws Exception {
+    Path storedPath = storageRoot.resolve("apps/1/users/2/file-id");
+    Files.createDirectories(storedPath.getParent());
+    Files.write(storedPath, "content".getBytes());
+    UserFile file = ownedFile("apps/1/users/2/file-id");
+    when(appRepository.findById(1L)).thenReturn(Optional.of(app));
+    when(userRepository.findById(2L)).thenReturn(Optional.of(user));
+    when(userFileRepository.findByAppAndUserAndId(app, user, 3L)).thenReturn(Optional.of(file));
+    UserFileStorageService service = new UserFileStorageService(
+        appRepository, userRepository, userFileRepository, storageConfig, null);
 
-//     App app = App.builder().id(1L).name("TestApp").build();
-//     User user = User.builder().id(1L).name("John").app(app).build();
+    service.delete(1L, 2L, 3L);
 
-//     Mockito.when(jwtUtil.getAppIdFromToken("fake-token")).thenReturn(1L);
-//     Mockito.when(appRepository.findById(1L)).thenReturn(java.util.Optional.of(app));
-//     Mockito.when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(user));
-//     Mockito.when(storageConfig.getStorageMode()).thenReturn("local");
-//     Mockito.when(storageConfig.getLocalPath()).thenReturn("./tmp/uploads");
+    assertFalse(Files.exists(storedPath));
+    verify(userFileRepository).delete(file);
+  }
 
-//     Path tmpDir = Path.of("./tmp/uploads");
-//     if (!Files.exists(tmpDir))
-//       Files.createDirectories(tmpDir);
-
-//     mockMvc.perform(multipart("/user_file/upload")
-//         .file(file)
-//         .param("userId", "1")
-//         .param("fileType", "image")
-//         .header("Authorization", "Bearer fake-token"))
-//         .andExpect(status().isOk());
-//   }
-
-//   @Test
-//   void listFiles_shouldReturnOk() throws Exception {
-//     App app = App.builder().id(1L).name("TestApp").build();
-//     User user = User.builder().id(1L).name("John").app(app).build();
-//     UserFile userFile = UserFile.builder()
-//         .id(1L)
-//         .fileType("image")
-//         .fileUrl("http://localhost/test.txt")
-//         .metadata(Map.of("size", 10, "name", "test.txt"))
-//         .build();
-
-//     Mockito.when(jwtUtil.getAppIdFromToken("fake-token")).thenReturn(1L);
-//     Mockito.when(appRepository.findById(1L)).thenReturn(java.util.Optional.of(app));
-//     Mockito.when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(user));
-//     Mockito.when(userFileRepository.findByAppAndUser(app, user)).thenReturn(List.of(userFile));
-
-//     mockMvc.perform(get("/user_file/list")
-//         .header("Authorization", "Bearer fake-token")
-//         .param("userId", "1"))
-//         .andExpect(status().isOk());
-//   }
-// }
+  private UserFile ownedFile(String key) {
+    return UserFile.builder()
+        .id(3L)
+        .app(app)
+        .user(user)
+        .fileUrl(key)
+        .metadata(java.util.Map.of("name", "report.txt", "contentType", "text/plain"))
+        .build();
+  }
+}

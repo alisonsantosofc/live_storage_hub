@@ -4,30 +4,30 @@ import com.alisondev.live_storage_hub.dtos.SendApiResponse;
 import com.alisondev.live_storage_hub.modules.users.dtos.UserDataResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.entities.UserData;
 import com.alisondev.live_storage_hub.modules.users.services.ListUserDataService;
-import com.alisondev.live_storage_hub.security.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.alisondev.live_storage_hub.modules.users.entities.User;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/users/{userId}/data")
+@RequestMapping("/users/data")
 @Tag(name = "User Data", description = "Endpoints for user data.")
+@SecurityRequirement(name = "bearerAuth")
 public class ListUserDataController {
 
   private final ListUserDataService listUserDataService;
-  private final JwtUtil jwtUtil;
 
   public ListUserDataController(
-    ListUserDataService listUserDataService,
-    JwtUtil jwtUtil
+    ListUserDataService listUserDataService
   ) {
     this.listUserDataService = listUserDataService;
-    this.jwtUtil = jwtUtil;
   }
 
   @Operation(
@@ -36,11 +36,10 @@ public class ListUserDataController {
   )
   @GetMapping
   public SendApiResponse<List<UserDataResponseDTO>> handle(
-    @RequestHeader("Authorization") String authHeader,
-    @PathVariable Long userId
+    @AuthenticationPrincipal User authenticatedUser
   ) {
-    String token = authHeader.replace("Bearer ", "");
-    Long appId = jwtUtil.getAppIdFromToken(token);
+    Long appId = authenticatedUser.getApp().getId();
+    Long userId = authenticatedUser.getId();
 
     List<UserDataResponseDTO> list = listUserDataService
       .execute(appId, userId)
@@ -48,7 +47,7 @@ public class ListUserDataController {
       .map(this::toDto)
       .collect(Collectors.toList());
 
-    return SendApiResponse.ok(list);
+    return SendApiResponse.ok("User data listed successfully.", list);
   }
 
   private UserDataResponseDTO toDto(UserData data) {

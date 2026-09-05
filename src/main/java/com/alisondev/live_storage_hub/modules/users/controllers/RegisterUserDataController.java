@@ -5,26 +5,27 @@ import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDataDTO;
 import com.alisondev.live_storage_hub.modules.users.dtos.RegisterUserDataResponseDTO;
 import com.alisondev.live_storage_hub.modules.users.entities.UserData;
 import com.alisondev.live_storage_hub.modules.users.services.RegisterUserDataService;
-import com.alisondev.live_storage_hub.security.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.alisondev.live_storage_hub.modules.users.entities.User;
 
 @RestController
-@RequestMapping("/users/{userId}/data")
+@RequestMapping("/users/data")
 @Tag(name = "User Data", description = "Endpoints for user data.")
+@SecurityRequirement(name = "bearerAuth")
 public class RegisterUserDataController {
   private final RegisterUserDataService registerUserDataService;
-  private final JwtUtil jwtUtil;
 
   public RegisterUserDataController(
-    RegisterUserDataService registerUserDataService,
-    JwtUtil jwtUtil
+    RegisterUserDataService registerUserDataService
   ) {
     this.registerUserDataService = registerUserDataService;
-    this.jwtUtil = jwtUtil;
   }
 
   @Operation(
@@ -33,16 +34,15 @@ public class RegisterUserDataController {
   )
   @PostMapping
   public SendApiResponse<RegisterUserDataResponseDTO> handle(
-    @RequestHeader("Authorization") String authHeader,
-    @PathVariable Long userId,
-    @RequestBody RegisterUserDataDTO request
+    @AuthenticationPrincipal User authenticatedUser,
+    @Valid @RequestBody RegisterUserDataDTO request
   ) {
-    String token = authHeader.replace("Bearer ", "");
-    Long appId = jwtUtil.getAppIdFromToken(token);
+    Long appId = authenticatedUser.getApp().getId();
+    Long userId = authenticatedUser.getId();
 
     UserData data = registerUserDataService.execute(appId, userId, request);
 
-    return SendApiResponse.ok(toDto(data));
+    return SendApiResponse.ok("User data registered successfully.", toDto(data));
   }
 
   private RegisterUserDataResponseDTO toDto(UserData data) {

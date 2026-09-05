@@ -36,16 +36,16 @@ public class LoginUserService {
 
   public LoginUserResponseDTO execute(String apiKey, LoginUserDTO request) {
     App app = appRepository.findByApiKey(apiKey)
-        .orElseThrow(() -> new ApiRuntimeException(prefix + 1, "App not found or invalid api key."));
+        .orElseThrow(() -> new ApiRuntimeException(prefix + 1, "Invalid API key."));
 
     User user = userRepository.findByAppAndEmail(app, request.getEmail())
-        .orElseThrow(() -> new ApiRuntimeException(prefix + 2, "User not found or invalid user id."));
+        .orElseThrow(() -> new ApiRuntimeException(prefix + 2, "Invalid email or password."));
 
     if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
       throw new ApiRuntimeException(prefix + 3, "Invalid email or password.");
     }
 
-    String token = jwtUtil.generateToken(user.getEmail(), app.getId());
+    String token = jwtUtil.generateToken(user.getId(), user.getEmail(), app.getId());
 
     LoginUserResponseDTO response = new LoginUserResponseDTO();
     response.setToken(token);

@@ -41,11 +41,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (authHeader != null && authHeader.startsWith("Bearer ")) {
       String jwt = authHeader.substring(7);
       if (jwtUtil.validateToken(jwt)) {
-        String email = jwtUtil.getEmailFromToken(jwt);
+        Long userId = jwtUtil.getUserIdFromToken(jwt);
         Long appId = jwtUtil.getAppIdFromToken(jwt);
 
-        App app = appRepository.findById(appId).orElse(null);
-        User user = (app != null) ? userRepository.findByAppAndEmail(app, email).orElse(null) : null;
+        App app = appId == null ? null : appRepository.findById(appId).orElse(null);
+        User user = (app != null && userId != null)
+            ? userRepository.findByAppAndId(app, userId).orElse(null)
+            : null;
 
         if (user != null && SecurityContextHolder.getContext().getAuthentication() == null) {
           var authToken = new UsernamePasswordAuthenticationToken(user, null, null);

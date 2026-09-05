@@ -1,3 +1,9 @@
 storage:
   mode: local
-  local-path: /tmp/uploads
+  local-path: ${LOCAL_STORAGE_PATH:./storage}
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:10MB}
+      max-request-size: ${MAX_REQUEST_SIZE:10MB}
